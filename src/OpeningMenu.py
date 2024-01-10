@@ -9,16 +9,17 @@ class OpeningMenu(QVBoxLayout):
     self.logo.setPixmap(QPixmap("assets/Temp-Icon.png"))
     self.logo.setScaledContents(True)
     self.addWidget(self.logo)
-
     self.show_new_window = show_new_window
+
     main_button = QPushButton("Main Menu")
     main_button.setCheckable(True)
     main_button.clicked.connect(open_application)
-    self.addWidget(main_button)
     settings_button = QPushButton("Settings")
     settings_button.setCheckable(True)
     settings_button.clicked.connect(self.open_settings)
+    self.addWidget(main_button)
     self.addWidget(settings_button)
+
 
   def open_settings(self):
     self.show_new_window(SettingsWindow())

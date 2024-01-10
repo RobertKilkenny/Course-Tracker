@@ -1,5 +1,5 @@
 from PySide2.QtCore import QSize
-from PySide2.QtWidgets import QMainWindow, QWidget, QVBoxLayout
+from PySide2.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton
 from utils.StateEnums import StateEnums
 from MyToolBar import MyToolBar
 from OpeningMenu import OpeningMenu
@@ -19,6 +19,9 @@ class MainWindow(QMainWindow):
     self.setMinimumSize(QSize(960, 540))
     self.set_container(MainMenu(self.load_opening_menu))
     self.setCentralWidget(self.container)
+
+  def close_application(self):
+    self.close()
   
   def load_opening_menu(self):
     self.toolbar.setVisible(False)
@@ -28,6 +31,10 @@ class MainWindow(QMainWindow):
 
   def set_container(self, layout: QVBoxLayout):
     self.container = QWidget()
+    exit_button = QPushButton("Exit Program")
+    exit_button.setCheckable(True)
+    exit_button.clicked.connect(self.close_application)
+    layout.addWidget(exit_button)
     self.container.setLayout(layout)
 
   def show_new_window(self, new_window: QWidget):
