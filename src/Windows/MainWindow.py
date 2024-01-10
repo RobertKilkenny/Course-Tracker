@@ -1,4 +1,5 @@
 from PySide2.QtCore import QSize
+from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton
 from utils.StateEnums import StateEnums
 from MyToolBar import MyToolBar
@@ -12,6 +13,7 @@ class MainWindow(QMainWindow):
     self.toolbar = MyToolBar(self.show_new_window)
     self.addToolBar(self.toolbar)
     self.load_opening_menu()
+    self.setWindowIcon(QIcon("assets/Temp-Icon.png"))
     self.state = StateEnums.LOADED
   
   def open_application(self):
