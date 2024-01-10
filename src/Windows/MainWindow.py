@@ -5,6 +5,7 @@ from utils.StateEnums import StateEnums
 from MyToolBar import MyToolBar
 from OpeningMenu import OpeningMenu
 from MainMenu import MainMenu
+from utils.ProcessCourseData import CourseList
 
 class MainWindow(QMainWindow):
   def __init__(self):
@@ -15,6 +16,7 @@ class MainWindow(QMainWindow):
     self.load_opening_menu()
     self.setWindowIcon(QIcon("assets/Temp-Icon.png"))
     self.state = StateEnums.LOADED
+    self.course_list = CourseList("./fake/the.csv")
   
   def open_application(self):
     self.toolbar.setVisible(True)
