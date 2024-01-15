@@ -6,13 +6,22 @@ class CourseList():
   def __init__(self, course_csv_location: str):
     if os.path.exists(course_csv_location):
       temp = pd.read_csv(course_csv_location)
-      if all(column in temp.columns for column in ["name", "credits"]):
-        self.df = temp[["name", "credits"]].copy()
-        self.df.set_index("name", inplace=True)
+      if all(column in temp.columns for column in ["Course Code", "Credits"]):
+        self.df = temp[["Course Code", "Credits"]].copy()
+
+        if "Course Name" in temp.columns:
+          self.df = pd.merge(self.df, temp[["Course Code", "Credits", "Course Name"]], on=["Course Code", "Credits"])
+        else:
+          self.df['Course Name'] = " "
+
         if "tags" in temp.columns:
-          self.df = pd.merge(self.df, temp[["name", "tags"]], on="name")
+          self.df = pd.merge(self.df, temp[["Course Code", "Credits", "tags"]], on=["Course Code", "Credits"])
+        else:
+          self.df['tags'] = " "
       else:
         print("invalid csv used")
+
+
     else:
       print("CSV did not exist")
       path_pieces = course_csv_location.split("/")
@@ -24,19 +33,14 @@ class CourseList():
           print("path:", path, "did not exist")
           os.makedirs(path)
 
-      columns = ['name', 'credits', 'tags']
-      data_types = {'name': str, 'credits': int, 'tags': TagList}
-      self.df = pd.DataFrame(columns=columns)
-      self.df.to_csv(course_csv_location, index=False)
-    print(self.df.head())
+      self.df = pd.DataFrame({'Course Code':["TMPXXXX"], 'Course Name':["Example Class"], 'Credits':[-1], 'tags': ["example, do not use"]})
+      self.df.to_csv(course_csv_location)
+
+    try:
+      self.df.set_index(['Course Code', 'Credits'], inplace=True)
+    except Exception as exception:
+      print("Error with creating Pandas Dataframe.\nSee:", exception)
 
 
   def search_by_tag(tag: str):
     pass
-
-class TagList():
-  def __init__():
-    pass
-
-  def __len__(self):
-    return 1
