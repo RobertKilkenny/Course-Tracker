@@ -11,17 +11,18 @@ class MainWindow(QMainWindow):
   def __init__(self):
     super().__init__()
     self.setWindowTitle("Course Tracker")
-    self.toolbar = MyToolBar(self.show_new_window)
+    self.course_list = CourseList("./fake/the.csv")
+    self.toolbar = MyToolBar(self.show_new_window, self.course_list)
+
     self.addToolBar(self.toolbar)
     self.load_opening_menu()
     self.setWindowIcon(QIcon("assets/Temp-Icon.png"))
     self.state = StateEnums.LOADED
-    self.course_list = CourseList("./fake/the.csv")
   
   def open_application(self):
     self.toolbar.setVisible(True)
     self.setMinimumSize(QSize(960, 540))
-    self.set_container(MainMenu(self.load_opening_menu))
+    self.set_container(MainMenu(self.load_opening_menu, self.toolbar))
     self.setCentralWidget(self.container)
 
   def close_application(self):
