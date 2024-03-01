@@ -1,6 +1,6 @@
 # Course Tracker
 
-Created by Robert Kilkenny using Python 3.11.6
+Created by Robert Kilkenny using Python 3.10.11
 
 ## Background
 
@@ -37,3 +37,5 @@ I wanted to use Python as my frontend for this application because I find PySide
 # Notes
 
 As the license says, feel free to use this repository to create your own Course Tracker (once it is working of course!). I would perfer if you credited me if you do alter it, especially if it is for a personal project!! Feel free to message me here if you have questions on how this works.
+
+To get started, just make a virtual environment (using `python -m venv env`)and then install all the packages using 
