@@ -1,5 +1,5 @@
 from PySide2.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QStackedWidget
-from PySide2.QtCore import QSize, Qt
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QPixmap
 from MyToolBar import MyToolBar
 from Functions.AddClass import AddClass
@@ -12,9 +12,7 @@ class MainMenu(QVBoxLayout):
 
     # Create the subwindow to display main content
     self.subwindow_stack = QStackedWidget()
-    self.add_class_widget = QWidget()
-    temp_layout = AddClass()
-    self.add_class_widget.setLayout(temp_layout)
+    self.add_class_widget = AddClass()
     self.subwindow_stack.addWidget(self.add_class_widget)
 
     # self.test_frame: QWidget = make_test_frame()

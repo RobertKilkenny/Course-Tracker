@@ -1,8 +1,8 @@
-from PySide2.QtWidgets import QVBoxLayout, QLineEdit
+from PySide2.QtWidgets import QWidget, QVBoxLayout, QLineEdit
 from PySide2.QtCore import QRegExp
 from PySide2.QtGui import QRegExpValidator
 
-class AddClass(QVBoxLayout):
+class AddClass(QWidget):
   def __init__(self):
     super().__init__()
     self.input_code = QLineEdit()
@@ -13,5 +13,7 @@ class AddClass(QVBoxLayout):
     self.input_credits.setPlaceholderText("How many credits is it worth?")
     input_reg = QRegExp("[0-9]")
     self.input_credits.setValidator(QRegExpValidator(input_reg))
-    self.addWidget(self.input_code)
-    self.addWidget(self.input_credits)
+    self.layout = QVBoxLayout()
+    self.layout.addWidget(self.input_code)
+    self.layout.addWidget(self.input_credits)
+    self.setLayout(self.layout)
