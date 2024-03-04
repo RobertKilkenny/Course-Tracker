@@ -1,36 +1,29 @@
 from PySide2.QtWidgets import QPushButton, QToolBar
-from PySide2.QtCore import Signal
 from Windows.SettingsWindow import SettingsWindow
-from Functions.AddClass import AddClass
+from typing import Callable
 
 class MyToolBar(QToolBar):
-  signal = Signal()
-  
-  def __init__(self, show_new_window, course_list):
+  def __init__(self, show_new_window: Callable):
     super().__init__()
     self.show_new_window = show_new_window
-    self.course_list = course_list
-    self.signal.connect(self.push_signal)
+
     settings = QPushButton("Settings")
     settings.setCheckable(True)
     settings.clicked.connect(self.open_settings)
-
     addClass = QPushButton("Add Class")
     addClass.setCheckable(True)
-    addClass.clicked.connect(self.add_class)
-
+    addClass.clicked.connect(self.open_add_class)
+    self.change_subwindow_stack = None
     self.addWidget(settings)
     self.addWidget(addClass)
+
+  def give_stack_shift_func(self, func: Callable[[int], None]):
+    self.change_subwindow_stack = func
 
   def open_settings(self):
     self.show_new_window(new_window=SettingsWindow())
   
-  def add_class(self):
-    self.frame_layout = AddClass()
-    self.signal.emit()
-  
-  def activate_function(self, reciever):
-    self.function = reciever
-
-  def push_signal(self):
-    self.function()
+  def open_add_class(self):
+    if self.change_subwindow_stack is None:
+      return
+    self.change_subwindow_stack(0)

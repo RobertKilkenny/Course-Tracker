@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
     super().__init__()
     self.setWindowTitle("Course Tracker")
     self.course_list = CourseList("./fake/the.csv")
-    self.toolbar = MyToolBar(self.show_new_window, self.course_list)
+    self.toolbar = MyToolBar(self.show_new_window)
 
     self.addToolBar(self.toolbar)
     self.load_opening_menu()
