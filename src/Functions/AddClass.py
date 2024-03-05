@@ -12,6 +12,10 @@ class AddClass(QWidget):
                                     placeholder="Put course code [ex. AAA0000]",
                                     regex=QRegExp("[A-Z]{3}[0-9]{4}"))
     
+    self.question_dict["course-name"] = QuestionBlock(question="What is the name of the course",
+                                    placeholder="Must be at least 3 characters long",
+                                    regex=QRegExp("^[\w\s\-]+$"))
+
     self.question_dict["course-credits"] = QuestionBlock(question="Input the credit for the course",
                                     placeholder="How many credits is it worth?",
                                     regex=QRegExp("[0-9]"))
@@ -26,10 +30,18 @@ class AddClass(QWidget):
   
   def validate_complete(self)->bool:
     print("Test if course code (%s) is 7 characters long" % self.question_dict["course-code"].input.text())
-    complete = len(self.question_dict["course-code"].input.text()) == 7
-    print("Test if course code (%s) is a valid credit number" % self.question_dict["course-credits"].input.text())
-    complete = complete and int(self.question_dict["course-credits"].input.text()) > 0
-    return complete
+    if not len(self.question_dict["course-code"].input.text()) == 7:
+      return False
+    print("Test if course name (%s) is at least 3 characters long" % self.question_dict["course-name"].input.text())
+    if not len(self.question_dict["course-name"].input.text()) > 2:
+      return False
+    print("Test if course credits (%s) has a value in the box" % self.question_dict["course-credits"].input.text())
+    if not len(self.question_dict["course-credits"].input.text()) == 1:
+      return False
+    print("Test if course credits (%s) is a valid credit number" % self.question_dict["course-credits"].input.text())
+    if not int(self.question_dict["course-credits"].input.text()) > 0:
+      return False
+    return True
   
   def handle_save(self):
     isComplete = self.validate_complete()
