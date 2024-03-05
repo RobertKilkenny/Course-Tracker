@@ -1,6 +1,6 @@
 from PySide2.QtCore import QSize
 from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton
+from PySide2.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QSizePolicy
 from utils.StateEnums import StateEnums
 from MyToolBar import MyToolBar
 from OpeningMenu import OpeningMenu
@@ -23,6 +23,7 @@ class MainWindow(QMainWindow):
     self.toolbar.setVisible(True)
     self.setMinimumSize(QSize(960, 540))
     self.set_container(MainMenu(self.load_opening_menu, self.toolbar, self.course_list))
+    self.container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     self.setCentralWidget(self.container)
 
   def close_application(self):
