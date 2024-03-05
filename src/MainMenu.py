@@ -3,16 +3,17 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QPixmap
 from MyToolBar import MyToolBar
 from Functions.AddClass import AddClass
+from utils.ProcessCourseData import CourseList
 
 class MainMenu(QVBoxLayout):
-  def __init__(self, load_opening_menu, toolbar: MyToolBar):
+  def __init__(self, load_opening_menu, toolbar: MyToolBar, course_list: CourseList):
     super().__init__()
     self.toolbar = toolbar
     self.toolbar.give_stack_shift_func(self.handle_change_subwindow)
 
     # Create the subwindow to display main content
     self.subwindow_stack = QStackedWidget()
-    self.add_class_widget = AddClass()
+    self.add_class_widget = AddClass(course_list= course_list)
     self.subwindow_stack.addWidget(self.add_class_widget)
 
     # self.test_frame: QWidget = make_test_frame()

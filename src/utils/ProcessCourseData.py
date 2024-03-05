@@ -33,13 +33,17 @@ class CourseList():
           print("path:", path, "did not exist")
           os.makedirs(path)
 
-      self.df = pd.DataFrame({'Course Code':["TMPXXXX"], 'Course Name':["Example Class"], 'Credits':[-1], 'tags': ["example, do not use"]})
-      self.df.to_csv(course_csv_location)
+      self.df = pd.DataFrame({'Course Code':"TMPXXXX", 'Course Name':"Example Class", 'Credits':-1, 'tags': "example, do not use"})
+      self.df.to_csv(course_csv_location, index_label=False)
+    print("The result of the CSV transfer is:\n", self.df)
 
     try:
-      self.df.set_index(['Course Code', 'Credits'], inplace=True)
+      self.df.set_index(['Course Code'], inplace=True)
     except Exception as exception:
       print("Error with creating Pandas Dataframe.\nSee:", exception)
+
+  def does_class_exist(self, course_code: str):
+    return course_code in self.df
 
 
   def search_by_tag(tag: str):

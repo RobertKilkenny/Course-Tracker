@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
   def open_application(self):
     self.toolbar.setVisible(True)
     self.setMinimumSize(QSize(960, 540))
-    self.set_container(MainMenu(self.load_opening_menu, self.toolbar))
+    self.set_container(MainMenu(self.load_opening_menu, self.toolbar, self.course_list))
     self.setCentralWidget(self.container)
 
   def close_application(self):

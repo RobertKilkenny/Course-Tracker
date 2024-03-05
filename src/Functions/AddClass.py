@@ -1,12 +1,15 @@
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QSizePolicy, QPushButton
 from PySide2.QtCore import QRegExp
 from PySide2.QtGui import QRegExpValidator, QFont, QFontMetrics
+from utils.ProcessCourseData import CourseList
+from typing import List
 
 class AddClass(QWidget):
-  def __init__(self):
+  def __init__(self, course_list: CourseList):
     super().__init__()
     self.layout = QVBoxLayout()
-    
+    self.course_list = course_list
+
     self.question_dict = {}
     self.question_dict["course-code"] = QuestionBlock(question="Input the new course code",
                                     placeholder="Put course code [ex. AAA0000]",
@@ -28,32 +31,74 @@ class AddClass(QWidget):
     saveButton.clicked.connect(self.handle_save)
     self.setLayout(self.layout)
   
-  def validate_complete(self)->bool:
-    print("Test if course code (%s) is 7 characters long" % self.question_dict["course-code"].input.text())
-    if not len(self.question_dict["course-code"].input.text()) == 7:
-      return False
-    print("Test if course name (%s) is at least 3 characters long" % self.question_dict["course-name"].input.text())
-    if not len(self.question_dict["course-name"].input.text()) > 2:
-      return False
-    print("Test if course credits (%s) has a value in the box" % self.question_dict["course-credits"].input.text())
-    if not len(self.question_dict["course-credits"].input.text()) == 1:
-      return False
-    print("Test if course credits (%s) is a valid credit number" % self.question_dict["course-credits"].input.text())
-    if not int(self.question_dict["course-credits"].input.text()) > 0:
-      return False
-    return True
   
+  def is_complete_input(self) -> bool:
+    error_list = self.validate_complete()
+    if not len(error_list) == 0:
+      print(read_user_errors(error_list))
+
+
+  def validate_complete(self)-> List[int]:
+    report = []
+    print("Running tests for validation, Each * means a failure")
+    print("Test if course code (%s) is 7 characters long" % self.question_dict["course-code"].input.text(), end="")
+    if not len(self.question_dict["course-code"].input.text()) == 7:
+      report.append(0)
+      print(" *", end ="")
+    print("\nTest if course name (%s) is at least 3 characters long" % self.question_dict["course-name"].input.text(),  end=" ")
+    if not len(self.question_dict["course-name"].input.text()) > 2:
+      report.append(1)
+      print(" *", end ="")
+    print("\nTest if course credits (%s) has a value in the box" % self.question_dict["course-credits"].input.text(),  end=" ")
+    if not len(self.question_dict["course-credits"].input.text()) == 1:
+      report.append(2)
+      print(" *", end ="")
+    else: 
+      print("\nTest if course credits (%s) is a valid credit number" % self.question_dict["course-credits"].input.text(),  end=" ")
+      if not int(self.question_dict["course-credits"].input.text()) > 0:
+        report.append(3)
+        print(" *", end ="")
+    print("\nTest if course code (%s) already exists" % self.question_dict["course-code"].input.text(),  end=" ")
+    if self.course_list.does_class_exist(self.question_dict["course-code"].input.text()):
+      report.append(4)
+      print(" *", end ="")
+    print("\n")
+    return report
+  
+
   def handle_save(self):
-    isComplete = self.validate_complete()
+    isComplete = self.is_complete_input()
     if isComplete:
       print("This is a valid class!")
     else:
       print("Invalid class!")
 
+
+def read_user_errors(list: List[int]) -> str:
+  report = ""
+  for number in list:
+    match number:
+      case 0:
+        report += "- Course Code is not complete"
+      case 1: 
+        report += "- Course name is not long enough"
+      case 2:
+        report += "- Course credits were not given"
+      case 3:
+        report += "- Course credits are not greater than 0"
+      case 4:
+        report += "- Course code already exists"
+      case _:
+        report += "- Create class tester gave invalid error!!!!"
+    report += "\n"
+  return report
+
+
 def get_min_size(text: QLineEdit) -> int:
   font_metrics = QFontMetrics(text.font())
   max_width = font_metrics.width(text.text())
   return max_width
+
 
 def create_title(text: str, font_size: int = 14) -> QLabel:
   text = QLabel(text)
@@ -78,5 +123,3 @@ class QuestionBlock(QWidget):
     self.input.setMaximumWidth(get_min_size(self.text))
     layout.addWidget(self.input)
     self.setLayout(layout)
-    
-  
