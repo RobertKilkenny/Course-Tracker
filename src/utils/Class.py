@@ -83,4 +83,15 @@ class Class:
 
     def return_tags_as_string(self) -> str:
         """Convert the list of tags to a string."""
-        return ';'.join(self.__tags)
+        return ', '.join(self.__tags)
+
+    def print_stats(self) -> None:
+        print("\nPrinting stats for class!\n--------------------")
+        print(f"Class Code: {self.__code}")
+        print(f"Class Name: {self.__name}")
+        print(f"Credits: {self.__credits}")
+        if len(self.__tags) > 0:
+            print("Tags")
+            for tag in self.__tags:
+                print(f"    * {tag}")
+        

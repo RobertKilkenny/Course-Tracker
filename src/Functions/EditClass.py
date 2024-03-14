@@ -51,14 +51,16 @@ class EditClass(QWidget):
     def check_class(self):
         """Function to determine if the class code given can be used to edit the database!"""
         message = ""
-        result = True
-        match handle_check(self.user_class_choice.input.text(), self.course_list):
+        result = False
+        user_input = self.user_class_choice.input.text()
+        match handle_check(user_input, self.course_list):
             case -1:
-                message = f"Code given ({self.user_class_choice.input.text()}) was invalid (not in the format AAA0000)!"
+                message = f"Code given ({user_input}) was invalid (not in the format AAA0000)!"
             case 1:
-                message = f"Code given({self.user_class_choice.input.text()}) was not found in the class catalog!"
+                message = f"Code given ({user_input}) was not found in the class catalog!"
             case 0:
-                message = f"Code given({self.user_class_choice.input.text()}) was found in the class catalog!"
+                message = f"Code given({user_input}) was found in the class catalog!"
+                self.course_list.return_class(user_input).print_stats()
                 result = True
             case _:
                 message = "ERROR: function gave back invalid code!"
