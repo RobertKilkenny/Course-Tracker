@@ -21,9 +21,11 @@ class QuestionBlock(QWidget):
         self.setLayout(layout)
 
 
-    def set_user_access(self, can_edit: bool):
+    def set_user_access(self, can_edit: bool, should_delete_text: bool = False):
         """Set Question Block to either allow user input or not allow changes."""
         self.input.setEnabled(can_edit)
+        if should_delete_text and not can_edit:
+            self.input.setText("")
 
 
     def change_line_edit_text(self, new_text: str):
