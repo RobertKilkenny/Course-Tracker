@@ -10,7 +10,7 @@ class SettingsWindow(QWidget):
         super().__init__()
         self.setWindowTitle("Application Settings")
         self.setMinimumSize(QSize(300, 600))
-        self.settings = {"Menu Size": "960x540", "Setting File Location": "app-data/settings.json"}
+        self.settings = {"Menu Size": "960x540", "Setting File Location": "app-data/app_settings.json"}
         layout = QVBoxLayout()
         button = QPushButton("Save")
         button.clicked.connect(self.save_settings)
