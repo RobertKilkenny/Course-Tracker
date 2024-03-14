@@ -21,6 +21,21 @@ class QuestionBlock(QWidget):
         self.setLayout(layout)
 
 
+    def set_user_access(self, can_edit: bool):
+        """Set Question Block to either allow user input or not allow changes."""
+        self.input.setEnabled(can_edit)
+
+
+    def change_line_edit_text(self, new_text: str):
+        """Change the text value for the answer part of the Question Block."""
+        self.input.setText(new_text)
+
+
+    def change_line_edit_placeholder(self, new_text: str):
+        """Change the placeholder text for the answer part of the Question Block."""
+        self.input.setPlaceholderText(new_text)
+
+
 def get_min_size(text: QLineEdit) -> int:
     """"Given a QLineEdit object, return the minimum length to be that size."""
     font_metrics = QFontMetrics(text.font())

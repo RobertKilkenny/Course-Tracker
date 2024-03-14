@@ -29,8 +29,8 @@ class AddClass(QWidget):
             self.layout.addWidget(value)
         save_button = QPushButton("Save Class")
         save_button.setCheckable(True)
-        self.layout.addWidget(save_button)
         save_button.clicked.connect(self.handle_save)
+        self.layout.addWidget(save_button)
         self.setLayout(self.layout)
 
 
