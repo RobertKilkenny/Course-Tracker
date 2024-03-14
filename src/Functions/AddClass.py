@@ -19,12 +19,12 @@ class AddClass(QWidget):
         self.question_dict["course-name"] = QuestionBlock(
             question="What is the name of the course",
             placeholder="Must be at least 3 characters long",
-            regex=QRegExp("^[\w\s\-]+$"))
+            regex=QRegExp(r"^[\w\s\-]+$"))
         self.question_dict["course-credits"] = QuestionBlock(
             question="Input the credit for the course",
             placeholder="How many credits is it worth?",
             regex=QRegExp("[0-9]"))
-        
+
         for value in self.question_dict.values():
             self.layout.addWidget(value)
         save_button = QPushButton("Save Class")
@@ -94,7 +94,7 @@ def read_user_errors(error_list) -> str:
         match number:
             case 0:
                 report += "- Course Code is not complete"
-            case 1: 
+            case 1:
                 report += "- Course name is not long enough"
             case 2:
                 report += "- Course credits were not given"
