@@ -1,7 +1,8 @@
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QPushButton
-from PySide2.QtCore import QRegExp
+from PySide2.QtCore import QRegExp, QPoint
 from utils.ProcessCourseData import CourseList
 from utils.QuestionBlock import QuestionBlock
+from Windows.PopupWindow import PopupWindow
 
 
 class EditClass(QWidget):
@@ -55,17 +56,30 @@ class EditClass(QWidget):
         user_input = self.user_class_choice.input.text()
         match handle_check(user_input, self.course_list):
             case -1:
-                message = f"Code given ({user_input}) was invalid (not in the format AAA0000)!"
+                message = f"Code given \"{user_input}\" was invalid (not in the format AAA0000)!"
             case 1:
-                message = f"Code given ({user_input}) was not found in the class catalog!"
+                message = f"Code given \"{user_input}\" was not found in the class catalog!"
             case 0:
-                message = f"Code given({user_input}) was found in the class catalog!"
+                message = f"Code given\"{user_input}\" was found in the class catalog!"
                 self.course_list.return_class(user_input).print_stats()
                 result = True
             case _:
                 message = "ERROR: function gave back invalid code!"
-        print(message)
+        if not result:
+            self.lock_screen(message)
         self.__update(result)
+        
+    def lock_screen(self, reason: str):
+        self.popup = PopupWindow(reason, "Okay", self.unlock_screen, "Could not edit class!")
+        parent_center = self.parent().geometry().center()
+        child_pos = parent_center + QPoint(self.popup.width() // 2, self.popup.height() // 2)
+        self.popup.move(child_pos)
+        self.setEnabled(False)
+        self.popup.show()
+    
+    def unlock_screen(self):
+        self.setEnabled(True)
+        self.popup.close()
 
 
 def handle_check(code: str, course_list: CourseList):

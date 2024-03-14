@@ -20,6 +20,7 @@ class MainMenu(QVBoxLayout):
         self.opening_widget = make_opener()
         self.add_class_widget = AddClass(course_list= course_list)
         self.edit_class_widget = EditClass(course_list= course_list)
+        self.edit_class_widget.setParent(self)
         self.subwindow_stack.addWidget(self.opening_widget)
         self.subwindow_stack.addWidget(self.add_class_widget)
         self.subwindow_stack.addWidget(self.edit_class_widget)
