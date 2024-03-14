@@ -38,6 +38,7 @@ pip-delete-this-directory.txt
 
 # Testing
 /fake/
+/app-data/
 
 #PyLint
 .pylintrc
