@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QPushButton
 from PySide2.QtCore import QRegExp, QPoint
 from utils.ProcessCourseData import CourseList
-from utils.QuestionBlock import QuestionBlock
+from utils.QuestionBlock import SimpleQuestionBlock
 from Windows.PopupWindow import PopupWindow
 
 
@@ -12,7 +12,7 @@ class EditClass(QWidget):
         self.layout = QVBoxLayout()
         self.course_list = course_list
 
-        self.user_class_choice = QuestionBlock(
+        self.user_class_choice = SimpleQuestionBlock(
             question="What is the class code that you want to change.",
             placeholder="Remember it should be in the form XXX0000",
             regex=QRegExp("[A-Z]{3}[0-9]{4}"))
@@ -23,7 +23,7 @@ class EditClass(QWidget):
         self.layout.addWidget(self.user_class_choice)
         self.layout.addWidget(self.check_button)
 
-        self.__form_questions = {"Class Name": QuestionBlock("New Course Name")}
+        self.__form_questions = {"Class Name": SimpleQuestionBlock("New Course Name")}
 
         for value in self.__form_questions.values():
             value.set_user_access(False)
@@ -70,7 +70,7 @@ class EditClass(QWidget):
         self.__update(result)
         
     def lock_screen(self, reason: str):
-        self.popup = PopupWindow(reason, "Okay", self.unlock_screen, "Could not edit class!")
+        self.popup = PopupWindow(reason, ["Okay"], [self.unlock_screen], "Could not edit class!", self.unlock_screen)
         parent_center = self.parent().geometry().center()
         child_pos = parent_center + QPoint(self.popup.width() // 2, self.popup.height() // 2)
         self.popup.move(child_pos)

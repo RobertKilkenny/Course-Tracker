@@ -2,7 +2,7 @@ from typing import List
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QPushButton
 from PySide2.QtCore import QRegExp
 from utils.ProcessCourseData import CourseList
-from utils.QuestionBlock import QuestionBlock
+from utils.QuestionBlock import SimpleQuestionBlock
 
 class AddClass(QWidget):
     """Create the window to have the user make a new class."""
@@ -12,15 +12,15 @@ class AddClass(QWidget):
         self.course_list = course_list
 
         self.question_dict = {}
-        self.question_dict["course-code"] = QuestionBlock(
+        self.question_dict["course-code"] = SimpleQuestionBlock(
             question="Input the new course code",
             placeholder="Put course code [ex. AAA0000]",
             regex=QRegExp("[A-Z]{3}[0-9]{4}"))
-        self.question_dict["course-name"] = QuestionBlock(
+        self.question_dict["course-name"] = SimpleQuestionBlock(
             question="What is the name of the course",
             placeholder="Must be at least 3 characters long",
             regex=QRegExp(r"^[\w\s\-]+$"))
-        self.question_dict["course-credits"] = QuestionBlock(
+        self.question_dict["course-credits"] = SimpleQuestionBlock(
             question="Input the credit for the course",
             placeholder="How many credits is it worth?",
             regex=QRegExp("[0-9]"))
