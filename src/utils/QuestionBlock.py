@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QLabel, QLineEdit, QSizePolicy
+from PySide2.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QSizePolicy
 from PySide2.QtCore import QRegExp
 from PySide2.QtGui import QRegExpValidator, QFont, QFontMetrics
 from typing import List, Dict
@@ -39,18 +39,25 @@ class SimpleQuestionBlock(QWidget):
         self.input.setPlaceholderText(new_text)
 
 
+    def get_answer(self):
+        """Return the text for the QLineEdit for the question."""
+        return self.input.text()
+
+
 class NestedQuestionBlock(QWidget):
-    """"A variation of the Simple Question Block which allows for a multiple QLineEdits for a single question"""
-    def __init__(self, title: str, question_list: List[str], regex_list: List[QRegExp] = None, placeholder_list = None,
-                 title_size: int = 14, sub_title_size: int = 10) -> QWidget:
+    """"A variation of the Simple Question Block which allows for a multiple
+     QLineEdits for a single question"""
+    def __init__(self, title: str, question_list: List[str], regex_list: List[QRegExp] = None,
+                placeholder_list = None, title_size: int = 14, sub_title_size: int = 10) -> QWidget:
         super().__init__()
         layout = QVBoxLayout()
         self.text = create_title(title, title_size)
         layout.addWidget(self.text)
         self.input = QLineEdit()
-        
+
         self.elements: Dict[str, SimpleQuestionBlock] = {}
-        for i in range(len(question_list)):    
+        length = len(question_list)
+        for i in range(length):
             if regex_list is None or len(question_list) != len(regex_list):
                 regex = None
             else:
@@ -59,7 +66,7 @@ class NestedQuestionBlock(QWidget):
                 placeholder = None
             else:
                 placeholder = placeholder_list[i]
-                
+
             self.elements[question_list[i]] = SimpleQuestionBlock(question_list[i], regex=regex,
                                                                   placeholder=placeholder,
                                                                   question_size=sub_title_size)
@@ -76,30 +83,20 @@ class NestedQuestionBlock(QWidget):
 
 
     def change_multiple_line_edit_text(self, keys: List[str], values: List[str]):
-        """Change the text value for each of the answer part of the Question Block using the keys given!"""
+        """Change the text value for each of the answer part of the Question Block
+         using the keys given!"""
         if len(keys) != len(values):
             return False
-        for i in range(len(keys)):
+        length = len(keys)
+        for i in range(length):
             value = str(values[i])
             self.elements[keys[i]].input.setText(value)
         return True
 
+    def get_subquestion_answer(self, key):
+        """Given a key, return what text is there as an answer."""
+        return self.elements[key].input.text()
 
-def get_min_size(text: QLineEdit) -> int:
-    """"Given a QLineEdit object, return the minimum length to be that size."""
-    font_metrics = QFontMetrics(text.font())
-    max_width = font_metrics.width(text.text())
-    return max_width
-
-
-def create_title(text: str, font_size: int = 14) -> QLabel:
-    """"Creating a QLabel given the text and size wanted."""
-    text = QLabel(text)
-    text.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-    font = QFont()
-    font.setPointSize(font_size)
-    text.setFont(font)
-    return text
 
 def get_min_size(text: QLineEdit) -> int:
     """"Given a QLineEdit object, return the minimum length to be that size."""
