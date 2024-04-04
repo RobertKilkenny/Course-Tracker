@@ -13,7 +13,10 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Course Tracker")
-        self.course_list = CourseList("./fake/the.csv")
+        try:
+            self.course_list = CourseList("./fake/the.csv")            
+        except ValueError as __:
+            self.course_list.gen_default_dataframe("./fake/the.csv")
         self.toolbar = MyToolBar(self.show_new_window)
         
         # Default to None for error checking

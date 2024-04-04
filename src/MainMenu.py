@@ -42,7 +42,7 @@ class MainMenu(QVBoxLayout):
         self.addWidget(self.button)
         test = self.setAlignment(self.subwindow_stack, Qt.AlignTop)
         if not test:
-          print("Well, that sucks lol")
+            print("Well, that sucks lol")
 
     def handle_change_subwindow(self, index: int):
         """Change the subwindow via an index reference
