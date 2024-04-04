@@ -8,11 +8,13 @@ EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode"],
                   "Credits": ["credits", "value", "credit hours", "credithours"]}
 
 class CourseList():
+    csv_file_path: str
     """Class Object to hold the data of a class for the purposes of this application."""
     def __init__(self, course_csv_location: str):
-        match self.create_dataframe_from_csv(course_csv_location):
+        self.csv_file_path = course_csv_location
+        match self.create_dataframe_from_csv():
             case -1:
-                self.gen_default_dataframe(course_csv_location)
+                self.gen_default_dataframe()
             case 1:
                 # Testing for issues with naming conventions
                 temp = pd.read_csv(course_csv_location)
@@ -26,10 +28,10 @@ class CourseList():
 
         print("\nThe result of the CSV transfer is\n------------------------------------------\n"
               , self.df)
-        self.print_csv(course_csv_location)
+        self.print_csv()
 
 
-    def create_dataframe_from_csv(self, course_csv_location:str):
+    def create_dataframe_from_csv(self):
         """Tests if a csv can be used to generate a dataframe.
 
         Args:
@@ -40,9 +42,9 @@ class CourseList():
              0: Dataframe was created
              1: CSV is not formated correctly
         """
-        if os.path.exists(course_csv_location):
+        if os.path.exists(self.csv_file_path):
             print("CSV is generating the dataframe")
-            temp = pd.read_csv(course_csv_location)
+            temp = pd.read_csv(self.csv_file_path)
 
             required_columns = ["Course Code", "Course Name", "Credits"]
             if all(column in temp.columns for column in required_columns):
@@ -60,9 +62,9 @@ class CourseList():
             return -1
 
 
-    def gen_default_dataframe(self, course_csv_location:str):
+    def gen_default_dataframe(self):
         """Sets the Course List's dataframe to default values."""
-        path_pieces = course_csv_location.split("/")
+        path_pieces = self.csv_file_path.split("/")
         path = path_pieces[0]
         for piece in path_pieces[1:-1]:
             path += "/" + piece
@@ -82,6 +84,11 @@ class CourseList():
             tags_as_string(str, optional): Allows for tags to be implemented as a string, 
             as that is how they are saved in the CSV using "|" as a delimiter.
         """
+        self.df.loc[code]= ({"Course Name": name, "Credits":value})
+        if tag_array is not None:
+                self.df["Tags"] = tag_array
+        elif tags_as_string != "":
+                self.df["Tags"] = from_string_to_list(tags_as_string)
 
 
     def does_class_exist(self, course_code: str) -> bool:
@@ -102,15 +109,15 @@ class CourseList():
         """Iterate through the dataframe and find all classes with the tag given."""
 
 
-    def print_csv(self, course_csv_location: str):
+    def print_csv(self):
         """Turns Dataframe into a CSV that is consistent to save for the program."""
         print("\nPrinting dataframe!",
               "\n------------------------------------------")
-        temp = self.df
+        temp = self.df.copy()
         temp["Tags"] = temp["Tags"].apply(from_list_to_string)
         temp.rename_axis("Course Code")
         print(temp)
-        temp.to_csv(course_csv_location, index_label="Course Code")
+        temp.to_csv(self.csv_file_path, index_label="Course Code")
 
 
     def __send_error(self):
@@ -118,10 +125,13 @@ class CourseList():
 
 
 def from_string_to_list(tags_string: str) -> List[str]:
-    """Convert a string to list of tags."""
+    """Convert a string to a list of tags."""
+    if not isinstance(tags_string, str):
+        return None
     return tags_string.split("|")
 
-
 def from_list_to_string(tag_list: List[str]) -> str:
-    """Convert a string to list of tags."""
-    return "|".join(map(str, tag_list))
+    """Convert a list of tags to a string."""
+    if not isinstance(tag_list, list) or not all(isinstance(tag, str) for tag in tag_list):
+        return None
+    return "|".join(tag_list)
