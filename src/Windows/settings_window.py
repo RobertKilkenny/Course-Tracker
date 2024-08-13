@@ -2,10 +2,10 @@
 import json
 from typing import Dict, List
 from PySide2.QtGui import QCloseEvent
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel
+from PySide2.QtWidgets import QWidget, QVBoxLayout, QPushButton
 from PySide2.QtCore import QSize, Qt
-from Windows.PopupWindow import PopupWindow
-from utils.QuestionBlock import NestedQuestionBlock, SimpleQuestionBlock
+from Windows.popup_window import PopupWindow
+from utils.question_block import NestedQuestionBlock, SimpleQuestionBlock
 
 CURRENT_SETTINGS_FOLDER = "./app-data/app_settings.json"
 DEFAULT_SETTINGS_FOLDER = "./app-data/default_settings.json"
@@ -43,14 +43,13 @@ class SettingsWindow(QWidget):
                 for sub_title, answer in value.items():
                     sub_titles.append(sub_title)
                     answers.append(answer)
-  
+
                 self.elements[key] = NestedQuestionBlock(key, sub_titles)
                 self.elements[key].change_multiple_line_edit_text(sub_titles, answers)
             else:
                 self.elements[key] = SimpleQuestionBlock(key)
                 self.elements[key].change_line_edit_text(value)
             layout.addWidget(self.elements[key])
-
 
         layout.addWidget(self.save_button)
         layout.addWidget(self.save_n_close_button)
@@ -108,7 +107,7 @@ class SettingsWindow(QWidget):
         with open(CURRENT_SETTINGS_FOLDER, encoding="utf-8") as json_file:
             all_settings_questions = json.load(json_file)
         for key, value in all_settings_questions.items():
-            if key not in self.elements.keys():
+            if key not in self.elements:
                 self.elements[key] = value
         self.__update()
 
@@ -116,7 +115,7 @@ class SettingsWindow(QWidget):
     def handle_default(self):
         """Create a popup to make sure that the user wants to reset to default settings."""
         self.w = PopupWindow("Are you sure you want to reset to default settings?",
-                             buttons_text_list=["yes", "no"], 
+                             buttons_text_list=["yes", "no"],
                              buttons_functions_list=[self.set_default_settings, self.popup_no_save],
                              window_title="Just checking!")
         self.w.show()

@@ -2,7 +2,7 @@ from typing import List
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QPushButton
 from PySide2.QtCore import QRegExp
 from utils.process_course_data import CourseList
-from utils.QuestionBlock import SimpleQuestionBlock
+from utils.question_block import SimpleQuestionBlock
 
 class AddClass(QWidget):
     """Create the window to have the user make a new class."""

@@ -1,6 +1,6 @@
 from typing import Callable
 from PySide2.QtWidgets import QPushButton, QToolBar
-from Windows.SettingsWindow import SettingsWindow
+from Windows.settings_window import SettingsWindow
 
 
 class MyToolBar(QToolBar):

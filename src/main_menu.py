@@ -1,9 +1,10 @@
-from PySide2.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QStackedWidget, QSizePolicy, QLayout
+from PySide2.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel
+from PySide2.QtWidgets import QStackedWidget, QSizePolicy, QLayout
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QPixmap, QFont
-from MyToolBar import MyToolBar
-from Functions.AddClass import AddClass
-from Functions.EditClass import EditClass
+from my_toolbar import MyToolBar
+from Functions.add_class import AddClass
+from Functions.edit_class import EditClass
 from utils.process_course_data import CourseList
 
 class MainMenu(QVBoxLayout):

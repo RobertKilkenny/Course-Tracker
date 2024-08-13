@@ -1,11 +1,11 @@
 from PySide2.QtCore import QSize
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QSizePolicy
-from utils.StateEnums import StateEnums
-from MyToolBar import MyToolBar
-from OpeningMenu import OpeningMenu
-from MainMenu import MainMenu
+from my_toolbar import MyToolBar
+from opening_menu import OpeningMenu
+from main_menu import MainMenu
 from utils.process_course_data import CourseList
+from utils.state_enums import StateEnums
 
 class MainWindow(QMainWindow):
     """Class the main window for the application to reside in.
@@ -42,7 +42,8 @@ class MainWindow(QMainWindow):
         """End the window and perform the necessary clean-up.
         """
         self.close()
-    
+
+
     def load_opening_menu(self):
         """Create opening window to introduce the application.
         """
@@ -50,6 +51,7 @@ class MainWindow(QMainWindow):
         self.setFixedSize(QSize(400, 400))
         self.set_container(OpeningMenu(self.open_application, self.show_new_window))
         self.setCentralWidget(self.container)
+
 
     def set_container(self, layout: QVBoxLayout):
         """Alter the container's value so that the system works properly.
@@ -63,6 +65,7 @@ class MainWindow(QMainWindow):
         exit_button.clicked.connect(self.close_application)
         layout.addWidget(exit_button)
         self.container.setLayout(layout)
+
 
     def show_new_window(self, new_window: QWidget):
         """Switch what type of window is used for the application (opening or main window).

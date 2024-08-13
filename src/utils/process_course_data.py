@@ -1,0 +1,181 @@
+"""Holds classes and functions that are used to process course data"""
+import os
+from typing import List
+import pandas as pd
+from utils.Class import Class
+
+
+EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode"],
+                  "Course Name": ["course name", "coursename"],
+                  "Credits": ["credits", "value", "credit hours", "credithours"]}
+
+class CourseList():
+    """Class Object to hold the data of a class for the purposes of this application."""
+    csv_file_path: str
+    def __init__(self, course_csv_location: str):
+        """_summary_
+
+        Args:
+            course_csv_location (str): Where the csv for the course data is located
+        """
+        self.csv_file_path = course_csv_location
+        result = self.create_dataframe_from_csv()
+        match result:
+            case -1:
+                self.gen_default_dataframe()
+            case 1:
+                temp = pd.read_csv(course_csv_location)
+                for category, typos in EXPECTED_TYPOS.items():
+                    title = next((col for col in temp.columns if col.lower() in typos), None)
+                    if title:
+                        temp.rename(columns={title: category}, inplace=True)
+                    else:
+                        self.__send_error("Invalid CSV was given for program.")
+                        break
+            case 0:
+                pass  # Dataframe was created successfully
+
+        print("\nThe result of the CSV transfer is\n------------------------------------------\n",
+              self.df)
+        self.print_csv()
+
+
+    def create_dataframe_from_csv(self):
+        """Read a csv file to make the dataframe for the app.
+
+        Returns:
+            int: Returns an enum to tell
+        """
+        if os.path.exists(self.csv_file_path):
+            print("CSV is generating the dataframe")
+            temp = pd.read_csv(self.csv_file_path)
+
+            required_columns = ["Course Code", "Course Name", "Credits"]
+            if all(column in temp.columns for column in required_columns):
+                self.df = temp
+                self.df.set_index(['Course Code'], inplace=True)
+                if "Tags" in temp.columns:
+                    self.df["Tags"] = temp["Tags"].apply(from_string_to_list)
+                else:
+                    self.df["Tags"] = []
+                return 0
+            else:
+                return 1
+        else:
+            return -1
+
+
+    def gen_default_dataframe(self):
+        """Create a generic dataframe for when no data frame could be made"""
+        path_pieces = self.csv_file_path.split("/")
+        path = path_pieces[0]
+        for piece in path_pieces[1:-1]:
+            path += "/" + piece
+            if not os.path.exists(path):
+                print("path:", path, "did not exist")
+                os.makedirs(path)
+        self.df = pd.DataFrame({'Course Name': ["Example Class"], 'Credits': [-1], 
+                                'Tags': [["example", "do not use"]]}, index=["AAA0000"])
+
+
+    def add_class(self, code: str, name: str, value: int, tag_array:List[str] = None,
+                tags_as_string:str = "") -> bool:
+        """Adds a new class to the dataframe for the course list.
+
+        Args:
+            code (str): The course code for the class to be added. Default format is 'AAA0000'
+            name (str): The name for the course.
+            value (int): The number of credits for the class.
+            tag_array (List[str], optional): A array holding different relevant tags.
+            Defaults to None.
+            tags_as_string (str, optional): a string of all tags delimited by a '|'. Defaults to "".
+
+        Returns:
+            bool: Tells if the class was made successfully.
+        """
+        self.df.loc[code] = {"Course Name": name, "Credits": value}
+        self.df.at[code, "Tags"] = tag_array if tag_array else from_string_to_list(tags_as_string) if tags_as_string else None
+
+
+    def does_class_exist(self, course_code: str) -> bool:
+        """Checks if the class already exists using the course code 
+        which is the index for the dataframe.
+
+        Args:
+            course_code (str): Code to search with within the dataframe.
+
+        Returns:
+            bool: Returns if the course code is found in the dataframe.
+        """
+        return course_code in self.df.index
+
+
+    def return_class(self, course_code: str) -> Class:
+        """Finds a class by a course code in the dataframe. 
+
+        Args:
+            course_code (str): The code for the class if it exists.
+
+        Returns:
+            Class: Object containing the class if it exists or returns None if
+            it does not exist.
+        """
+        if not self.does_class_exist(course_code=course_code):
+            return None
+        information = self.df.loc[course_code]
+        return Class(course_code, information["Course Name"], int(information["Credits"]),
+                     information["Tags"])
+
+
+    def search_by_tag(self, tag: str):
+        """_summary_
+
+        Args:
+            tag (str): _description_
+        """
+
+
+    def print_csv(self):
+        """_summary_"""
+        print("\nPrinting dataframe!",
+              "\n------------------------------------------")
+        temp = self.df.copy()
+        temp["Tags"] = temp["Tags"].apply(from_list_to_string)
+        temp.rename_axis("Course Code", inplace=True)
+        print(temp)
+        temp.to_csv(self.csv_file_path, index_label="Course Code")
+
+
+    def __send_error(self, msg:str):
+        """_summary_
+
+        Raises:
+            ValueError: _description_
+        """
+        raise ValueError(msg)
+
+
+def from_string_to_list(tags_string: str) -> List[str]:
+    """Create a List from a string that delimited by a '|'.
+
+    Args:
+        tags_string (str): The string that holds objects.
+
+    Returns:
+        List[str]: The list holding each element from the string.
+    """
+    return tags_string.split("|")
+
+
+def from_list_to_string(tag_list: List[str]) -> str:
+    """Create a string that delimits each element in the list with a '|'.
+
+    Args:
+        tag_list (List[str]): The List to transform.
+
+    Returns:
+        str: The list transformed into a string.
+    """
+    if not isinstance(tag_list, list) or not all(isinstance(tag, str) for tag in tag_list):
+        return None
+    return "|".join(tag_list)
