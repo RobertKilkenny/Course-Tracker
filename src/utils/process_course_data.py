@@ -2,7 +2,7 @@
 import os
 from typing import List
 import pandas as pd
-from utils.Class import Class
+from  utils.my_class import Class
 
 
 EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode"],
