@@ -5,7 +5,7 @@ from utils.StateEnums import StateEnums
 from MyToolBar import MyToolBar
 from OpeningMenu import OpeningMenu
 from MainMenu import MainMenu
-from utils.ProcessCourseData import CourseList
+from utils.process_course_data import CourseList
 
 class MainWindow(QMainWindow):
     """Class the main window for the application to reside in.
@@ -14,11 +14,12 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Course Tracker")
         try:
-            self.course_list = CourseList("./fake/the.csv")            
+            self.course_list = CourseList("./fake/the.csv")
         except ValueError as __:
-            self.course_list.gen_default_dataframe("./fake/the.csv")
+            self.course_list = CourseList("./fake/the.csv")
+            self.course_list.gen_default_dataframe()
         self.toolbar = MyToolBar(self.show_new_window)
-        
+
         # Default to None for error checking
         self.container = None
         self.w = None
@@ -27,7 +28,7 @@ class MainWindow(QMainWindow):
         self.load_opening_menu()
         self.setWindowIcon(QIcon("assets/Temp-Icon.png"))
         self.state = StateEnums.LOADED
-    
+
     def open_application(self):
         """Create the main application to load from the opening window.
         """

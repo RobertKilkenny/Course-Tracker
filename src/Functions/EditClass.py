@@ -1,6 +1,6 @@
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QPushButton
 from PySide2.QtCore import QRegExp, QPoint
-from utils.ProcessCourseData import CourseList
+from utils.process_course_data import CourseList
 from utils.QuestionBlock import SimpleQuestionBlock
 from Windows.PopupWindow import PopupWindow
 
@@ -11,6 +11,7 @@ class EditClass(QWidget):
         super().__init__()
         self.layout = QVBoxLayout()
         self.course_list = course_list
+        self.popup = None
 
         self.user_class_choice = SimpleQuestionBlock(
             question="What is the class code that you want to change.",
@@ -68,22 +69,28 @@ class EditClass(QWidget):
         if not result:
             self.lock_screen(message)
         self.__update(result)
-        
+
+
     def lock_screen(self, reason: str):
-        self.popup = PopupWindow(reason, ["Okay"], [self.unlock_screen], "Could not edit class!", self.unlock_screen)
+        """Lock the edit screen since the class should not be edited."""
+        self.popup = PopupWindow(reason, ["Okay"], [self.unlock_screen],
+                                "Could not edit class!", self.unlock_screen)
         parent_center = self.parent().geometry().center()
         child_pos = parent_center + QPoint(self.popup.width() // 2, self.popup.height() // 2)
         self.popup.move(child_pos)
         self.setEnabled(False)
         self.popup.show()
-    
+
+
     def unlock_screen(self):
+        """Unlocks the screen so it can edit."""
         self.setEnabled(True)
         self.popup.close()
 
 
 def handle_check(code: str, course_list: CourseList):
-    """Checks if the user given class code is valid and if it exists in the dataset. Returns 0 if valid, -1 if the input is invalid and 1 if it does not exist in the dataset."""
+    """Checks if the user given class code is valid and if it exists in the dataset.
+    Returns 0 if valid, -1 if the input is invalid and 1 if it does not exist in the dataset."""
     if len(code) < 7:
         return -1
     if  course_list.does_class_exist(code):

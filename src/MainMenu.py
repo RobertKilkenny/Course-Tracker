@@ -4,7 +4,7 @@ from PySide2.QtGui import QPixmap, QFont
 from MyToolBar import MyToolBar
 from Functions.AddClass import AddClass
 from Functions.EditClass import EditClass
-from utils.ProcessCourseData import CourseList
+from utils.process_course_data import CourseList
 
 class MainMenu(QVBoxLayout):
     """Make the layout"""
@@ -44,6 +44,7 @@ class MainMenu(QVBoxLayout):
         if not test:
             print("Well, that sucks lol")
 
+
     def handle_change_subwindow(self, index: int):
         """Change the subwindow via an index reference
         * -1 = Debug / Test Frame Window
@@ -61,10 +62,12 @@ class MainMenu(QVBoxLayout):
                 print("Test Frame Window (Debug Only)")
                 change_to = self.test_frame
         self.subwindow_stack.setCurrentWidget(change_to)
-  
+
+
     def run_test_frame(self):
         """Run the test from to see if subwindow changes work."""
         self.handle_change_subwindow(-1)
+
 
 def make_test_frame() -> QWidget:
     """Create an testing message to show when it is opened."""
