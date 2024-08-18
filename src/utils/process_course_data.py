@@ -1,5 +1,6 @@
 """Holds classes and functions that are used to process course data"""
 import os
+import math
 from typing import List
 import pandas as pd
 from  utils.my_class import Class
@@ -55,6 +56,7 @@ class CourseList():
                 self.df = temp
                 self.df.set_index(['Course Code'], inplace=True)
                 if "Tags" in temp.columns:
+                    print(temp)
                     self.df["Tags"] = temp["Tags"].apply(from_string_to_list)
                 else:
                     self.df["Tags"] = []
@@ -74,7 +76,7 @@ class CourseList():
             if not os.path.exists(path):
                 print("path:", path, "did not exist")
                 os.makedirs(path)
-        self.df = pd.DataFrame({'Course Name': ["Example Class"], 'Credits': [-1], 
+        self.df = pd.DataFrame({'Course Name': ["Example Class"], 'Credits': [-1],
                                 'Tags': [["example", "do not use"]]}, index=["AAA0000"])
 
 
@@ -94,7 +96,8 @@ class CourseList():
             bool: Tells if the class was made successfully.
         """
         self.df.loc[code] = {"Course Name": name, "Credits": value}
-        self.df.at[code, "Tags"] = tag_array if tag_array else from_string_to_list(tags_as_string) if tags_as_string else None
+        result = tag_array if tag_array else from_string_to_list(tags_as_string) if tags_as_string else None
+        self.df.at[code, "Tags"] = result
 
 
     def does_class_exist(self, course_code: str) -> bool:
@@ -164,6 +167,8 @@ def from_string_to_list(tags_string: str) -> List[str]:
     Returns:
         List[str]: The list holding each element from the string.
     """
+    if tags_string is None or (isinstance(tags_string, float) and math.isnan(tags_string)):
+        return []
     return tags_string.split("|")
 
 
@@ -176,6 +181,8 @@ def from_list_to_string(tag_list: List[str]) -> str:
     Returns:
         str: The list transformed into a string.
     """
-    if not isinstance(tag_list, list) or not all(isinstance(tag, str) for tag in tag_list):
-        return None
+    if not all(isinstance(tag, str) for tag in tag_list):
+        for element in tag_list:
+            if not isinstance(element, str):
+                tag_list.remove(element)
     return "|".join(tag_list)

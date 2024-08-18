@@ -83,11 +83,11 @@ class AddClass(QWidget):
         is_complete = self.is_complete_input()
         if is_complete:
             print("This is a valid class!")
+            self.course_list.add_class(code=self.question_dict["course-code"].input.text(),
+                                       name=self.question_dict["course-name"].input.text(),
+                                       value=int(self.question_dict["course-credits"].input.text()))
         else:
             print("Invalid class!")
-        self.course_list.add_class(code=self.question_dict["course-code"].input.text(),
-                                   name=self.question_dict["course-name"].input.text(),
-                                   value=int(self.question_dict["course-credits"].input.text()))
         self.course_list.print_csv()
 
 
