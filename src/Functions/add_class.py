@@ -11,6 +11,7 @@ class AddClass(QWidget):
         self.layout = QVBoxLayout()
         self.course_list = course_list
 
+        #Define subwindow objects
         self.question_dict = {}
         self.question_dict["course-code"] = SimpleQuestionBlock(
             question="Input the new course code",
@@ -25,6 +26,7 @@ class AddClass(QWidget):
             placeholder="How many credits is it worth?",
             regex=QRegExp("[0-9]"))
 
+        #Link objects to layout to be displayed
         for value in self.question_dict.values():
             self.layout.addWidget(value)
         save_button = QPushButton("Save Class")

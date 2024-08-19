@@ -10,6 +10,7 @@ class GenerateCSV(QWidget):
     """Create the window to have the user make a new class."""
     def __init__(self, course_list: CourseList):
         super().__init__()
+
         self.layout = QVBoxLayout()
         self.course_list = course_list
         self.complete = False
@@ -17,6 +18,10 @@ class GenerateCSV(QWidget):
         save_button.setCheckable(True)
         save_button.clicked.connect(self.handle_save)
         self.prompt = save_button
+
+        #Link objects to layout to be displayed
+        self.layout.addWidget(self.prompt)
+        self.setLayout(self.layout)
 
 
     def handle_save(self):
