@@ -1,5 +1,6 @@
 """Module to hold the class SettingsWindow that can be called by the application."""
 import json
+import os
 from typing import Dict, List
 from PySide2.QtGui import QCloseEvent
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QPushButton
@@ -7,8 +8,11 @@ from PySide2.QtCore import QSize, Qt
 from Windows.popup_window import PopupWindow
 from utils.question_block import NestedQuestionBlock, SimpleQuestionBlock
 
-CURRENT_SETTINGS_FOLDER = "./app-data/app_settings.json"
-DEFAULT_SETTINGS_FOLDER = "./app-data/default_settings.json"
+
+DEFAULT_SETTINGS_FOLDER = "./app-data/data.json"
+DEFAULT_SETTINGS = {"Default App Size": {"height": 500, "width": 500},
+                    "Class Data Path": "./class.csv",
+                    "Settings Data Path": "./app-data/data.json"}
 
 class SettingsWindow(QWidget):
     """Secondary window to create a json file.
@@ -18,12 +22,15 @@ class SettingsWindow(QWidget):
         self.setWindowTitle("Application Settings")
         self.setMinimumSize(QSize(300, 600))
         self.settings = {}
+        self.curr_settings_folder = DEFAULT_SETTINGS_FOLDER
 
-        with open(CURRENT_SETTINGS_FOLDER, encoding="utf-8") as json_file:
-            self.settings = json.load(json_file)
+        if os.path.exists( self.curr_settings_folder):
+            with open(self.curr_settings_folder, encoding="utf-8") as json_file:
+                self.settings = json.load(json_file)
+        else:
+            self.settings = DEFAULT_SETTINGS
 
         self.elements: Dict[str, QWidget] = {}
-
         self.save_button = QPushButton("Save")
         self.save_button.clicked.connect(self.save_settings)
         self.save_n_close_button = QPushButton("Save and Close")
@@ -35,6 +42,7 @@ class SettingsWindow(QWidget):
 
     def __update(self):
         layout = QVBoxLayout()
+        self.elements = {}
         print(self.settings)
         for key, value in self.settings.items():
             if isinstance(value, Dict):
@@ -96,7 +104,7 @@ class SettingsWindow(QWidget):
             else:
                 self.settings[key] = self.elements[key].get_answer()
         print("saving settings")
-        with open(CURRENT_SETTINGS_FOLDER, "w", encoding="utf-8") as json_file:
+        with open(self.curr_settings_folder, "w", encoding="utf-8") as json_file:
             json.dump(self.settings, json_file, indent=4)
 
 
@@ -104,7 +112,7 @@ class SettingsWindow(QWidget):
         """Run this to ensure that all settings are being accounted for and if not,
         creates them with default values.
         """
-        with open(CURRENT_SETTINGS_FOLDER, encoding="utf-8") as json_file:
+        with open(self.curr_settings_folder, encoding="utf-8") as json_file:
             all_settings_questions = json.load(json_file)
         for key, value in all_settings_questions.items():
             if key not in self.elements:
@@ -123,14 +131,10 @@ class SettingsWindow(QWidget):
 
     def set_default_settings(self):
         """Set all settings to predetermined values by default_settings.json."""
-        with open(DEFAULT_SETTINGS_FOLDER, encoding="utf-8") as json_file:
-            all_settings_questions = json.load(json_file)
-        for key, value in all_settings_questions.items():
-            self.settings[key] = value
-        with open(CURRENT_SETTINGS_FOLDER, "w", encoding="utf-8") as json_file:
+        self.settings = DEFAULT_SETTINGS
+        with open(self.curr_settings_folder, "w", encoding="utf-8") as json_file:
             json.dump(self.settings, json_file, indent=4)
+        print("\n\nDefaulting setting!!")
         self.__update()
-        try:
+        if self.w.isVisible:
             self.w.close()
-        except AttributeError:
-            return

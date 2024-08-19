@@ -10,14 +10,16 @@ from utils.state_enums import StateEnums
 class MainWindow(QMainWindow):
     """Class the main window for the application to reside in.
     """
-    def __init__(self):
+    def __init__(self, data):
         super().__init__()
         self.setWindowTitle("Course Tracker")
+        self.app_data = data
         try:
-            self.course_list = CourseList("./fake/the.csv")
-        except ValueError as __:
-            self.course_list = CourseList("./fake/the.csv")
-            self.course_list.gen_default_dataframe()
+            print(self.app_data)
+            self.course_list = CourseList(self.app_data["Class Data Path"])
+        except ValueError as err:
+            print(err)
+            self.course_list = CourseList()
         self.toolbar = MyToolBar(self.show_new_window)
 
         # Default to None for error checking
@@ -37,6 +39,7 @@ class MainWindow(QMainWindow):
         self.set_container(MainMenu(self.load_opening_menu, self.toolbar, self.course_list))
         self.container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setCentralWidget(self.container)
+
 
     def close_application(self):
         """End the window and perform the necessary clean-up.

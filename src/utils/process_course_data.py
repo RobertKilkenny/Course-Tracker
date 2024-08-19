@@ -3,7 +3,7 @@ import os
 import math
 from typing import List
 import pandas as pd
-from  utils.my_class import Class
+from utils.my_class import Class
 
 
 EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode"],
@@ -13,17 +13,31 @@ EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode"],
 class CourseList():
     """Class Object to hold the data of a class for the purposes of this application."""
     csv_file_path: str
-    def __init__(self, course_csv_location: str):
+
+    @property
+    def df(self):
+        return self._df
+
+    @df.setter
+    def df(self, df):
+        self._df = df
+
+    def __init__(self, course_csv_location: str = None):
         """_summary_
 
         Args:
             course_csv_location (str): Where the csv for the course data is located
         """
         self.csv_file_path = course_csv_location
-        result = self.create_dataframe_from_csv()
-        match result:
+        if course_csv_location is None:
+            self._df = pd.DataFrame()
+            return
+
+        self.result = self.create_dataframe_from_csv()
+        match self.result:
+            # Failed due to the CSV not existing!
             case -1:
-                self.gen_default_dataframe()
+                self.__send_error("CSV does not exist.")
             case 1:
                 temp = pd.read_csv(course_csv_location)
                 for category, typos in EXPECTED_TYPOS.items():
@@ -33,12 +47,12 @@ class CourseList():
                     else:
                         self.__send_error("Invalid CSV was given for program.")
                         break
+            # There was no problems making the Dataframe
             case 0:
-                pass  # Dataframe was created successfully
+                pass
 
         print("\nThe result of the CSV transfer is\n------------------------------------------\n",
               self.df)
-        self.print_csv()
 
 
     def create_dataframe_from_csv(self):
@@ -66,20 +80,6 @@ class CourseList():
         else:
             return -1
 
-
-    def gen_default_dataframe(self):
-        """Create a generic dataframe for when no data frame could be made"""
-        path_pieces = self.csv_file_path.split("/")
-        path = path_pieces[0]
-        for piece in path_pieces[1:-1]:
-            path += "/" + piece
-            if not os.path.exists(path):
-                print("path:", path, "did not exist")
-                os.makedirs(path)
-        self.df = pd.DataFrame({'Course Name': ["Example Class"], 'Credits': [-1],
-                                'Tags': [["example", "do not use"]]}, index=["AAA0000"])
-
-
     def add_class(self, code: str, name: str, value: int, tag_array:List[str] = None,
                 tags_as_string:str = "") -> bool:
         """Adds a new class to the dataframe for the course list.
@@ -96,7 +96,11 @@ class CourseList():
             bool: Tells if the class was made successfully.
         """
         self.df.loc[code] = {"Course Name": name, "Credits": value}
-        result = tag_array if tag_array else from_string_to_list(tags_as_string) if tags_as_string else None
+        result = (
+            tag_array if tag_array
+            else from_string_to_list(tags_as_string) if tags_as_string
+            else None
+        )
         self.df.at[code, "Tags"] = result
 
 

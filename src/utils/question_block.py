@@ -91,6 +91,7 @@ class NestedQuestionBlock(QWidget):
         for i in range(length):
             value = str(values[i])
             self.elements[keys[i]].input.setText(value)
+            self.elements[keys[i]].show()
         return True
 
     def get_subquestion_answer(self, key):
@@ -107,9 +108,9 @@ def get_min_size(text: QLineEdit) -> int:
 
 def create_title(text: str, font_size: int = 14) -> QLabel:
     """"Creating a QLabel given the text and size wanted."""
-    text = QLabel(text)
-    text.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+    title = QLabel(str(text))
+    title.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
     font = QFont()
     font.setPointSize(font_size)
-    text.setFont(font)
-    return text
+    title.setFont(font)
+    return title
