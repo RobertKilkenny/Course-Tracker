@@ -3,7 +3,7 @@ import os
 import math
 from typing import List
 import pandas as pd
-from utils.my_class import Class
+from utils.course_object import CourseObject
 
 
 EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode"],
@@ -117,7 +117,7 @@ class CourseList():
         return course_code in self.df.index
 
 
-    def return_class(self, course_code: str) -> Class:
+    def return_class(self, course_code: str) -> CourseObject:
         """Finds a class by a course code in the dataframe. 
 
         Args:
@@ -130,7 +130,7 @@ class CourseList():
         if not self.does_class_exist(course_code=course_code):
             return None
         information = self.df.loc[course_code]
-        return Class(course_code, information["Course Name"], int(information["Credits"]),
+        return CourseObject(course_code, information["Course Name"], int(information["Credits"]),
                      information["Tags"])
 
 

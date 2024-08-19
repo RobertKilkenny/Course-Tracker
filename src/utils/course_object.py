@@ -2,7 +2,7 @@
 from typing import List
 
 
-class Class:
+class CourseObject:
     """Class to hold the data of a class for the purposes of this application."""
     def __init__(self, code: str, name: str, credit_count: int, tags: List[str] = None):
         self.__code = code
@@ -50,7 +50,7 @@ class Class:
                 self.__tags.append(tag)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Class):
+        if not isinstance(other, CourseObject):
             return False
         return (self.__code == other.code
                 and self.__name == other.name
