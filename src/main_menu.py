@@ -11,10 +11,12 @@ from utils.app_manager import AppManager
 
 class MainMenu(QVBoxLayout):
     """Make the layout"""
-    def __init__(self, load_opening_menu, toolbar: MyToolBar, course_list: CourseList, app_manager: AppManager):
+    def __init__(self, load_opening_menu, toolbar: MyToolBar,
+                 course_list: CourseList, app_manager: AppManager):
         super().__init__()
         self.setSizeConstraint(QLayout.SetNoConstraint)
         self.toolbar = toolbar
+        self.course_list = course_list
         self.app_manager = app_manager
         self.app_manager.connect_subwindow_change(self.handle_change_subwindow)
 
@@ -22,11 +24,11 @@ class MainMenu(QVBoxLayout):
         self.subwindow_stack = QStackedWidget()
         self.subwindow_stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.opening_widget = make_opener()
-        self.add_class_widget = AddClass(course_list= course_list)
+        self.add_class_widget = AddClass(self.course_list, self.app_manager)
         self.add_class_widget.setParent(self)
-        self.edit_class_widget = EditClass(course_list= course_list)
+        self.edit_class_widget = EditClass(self.course_list, self.app_manager)
         self.edit_class_widget.setParent(self)
-        self.gen_csv_widget = GenerateCSV(course_list= course_list)
+        self.gen_csv_widget = GenerateCSV(self.course_list, self.app_manager)
         self.gen_csv_widget.setParent(self)
         self.subwindow_stack.addWidget(self.opening_widget)
         self.subwindow_stack.addWidget(self.add_class_widget)
@@ -63,6 +65,7 @@ class MainMenu(QVBoxLayout):
             case -1:
                 print("Generate CSV Window")
                 change_to = self.gen_csv_widget
+                self.app_manager.require_csv_generate(self.gen_csv_widget)
             case 0:
                 print("Add Class Window")
                 change_to = self.add_class_widget

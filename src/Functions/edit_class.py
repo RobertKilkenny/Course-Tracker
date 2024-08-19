@@ -2,14 +2,15 @@ from PySide2.QtWidgets import QPushButton
 from PySide2.QtCore import QRegExp, QPoint
 from utils.process_course_data import CourseList
 from utils.subwindow_widget import SubwindowWidget
+from utils.app_manager import AppManager
 from utils.question_block import SimpleQuestionBlock
 from Windows.popup_window import PopupWindow
 
 
 class EditClass(SubwindowWidget):
     """This is the subwindow to edit an existing class"""
-    def __init__(self, course_list: CourseList):
-        super().__init__(course_list)
+    def __init__(self, course_list: CourseList, app_manager: AppManager):
+        super().__init__(course_list, app_manager)
         self.popup = None
 
         self.user_class_choice = SimpleQuestionBlock(

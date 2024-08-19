@@ -3,11 +3,21 @@ Holds events and listeners so that different events can be handled without expli
 from typing import Callable
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtWidgets import QWidget
+from Functions.generate_csv import GenerateCSV
 
 class AppManager(QObject):
+    """Class to faciliate communication between app widgets."""
     __subwindow_change = Signal(int)
     __open_window_request = Signal(QWidget)
     __close_application = Signal()
+    __generated_csv = Signal()
+    __can_change_subwindow = True
+    gen_csv_widget = None
+
+    @property
+    def can_change_subwindow(self) -> bool:
+        """Property to determine if subwindow changes should be allowed."""
+        return self.__can_change_subwindow
 
 
     def connect_subwindow_change(self, function: Callable):
@@ -63,3 +73,23 @@ class AppManager(QObject):
     def emit_close_app_request(self):
         """Notify Main Window to kill app."""
         self.__close_application.emit()
+
+
+    def connect_generated_csv(self, function: Callable):
+        """Connect Function to the generated_csv Signal
+
+        Args:
+            function (Callable): The function that should be signaled on emit
+        """
+        self.__generated_csv.connect(function)
+
+
+    def emit_generated_csv(self):
+        """Notify Main Window to kill app."""
+        self.__generated_csv.emit()
+
+
+    def require_csv_generate(self, gen_csv_widget: GenerateCSV):
+        """Lock app until a csv that can be used is made OR found!"""
+        self.__can_change_subwindow = False
+        self.gen_csv_widget = gen_csv_widget
