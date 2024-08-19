@@ -1,15 +1,14 @@
 from typing import List
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QPushButton
+from PySide2.QtWidgets import QPushButton
 from PySide2.QtCore import QRegExp
 from utils.process_course_data import CourseList
+from utils.subwindow_widget import SubwindowWidget
 from utils.question_block import SimpleQuestionBlock
 
-class AddClass(QWidget):
+class AddClass(SubwindowWidget):
     """Create the window to have the user make a new class."""
     def __init__(self, course_list: CourseList):
-        super().__init__()
-        self.layout = QVBoxLayout()
-        self.course_list = course_list
+        super().__init__(course_list)
 
         #Define subwindow objects
         self.question_dict = {}

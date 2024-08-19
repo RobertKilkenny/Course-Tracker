@@ -1,18 +1,15 @@
 from typing import List
 from time import sleep
 import asyncio
-from PySide2.QtWidgets import QWidget, QVBoxLayout
 from PySide2.QtWidgets import QPushButton
 from utils.process_course_data import CourseList
-from utils.question_block import SimpleQuestionBlock
+from utils.subwindow_widget import SubwindowWidget
 
-class GenerateCSV(QWidget):
+class GenerateCSV(SubwindowWidget):
     """Create the window to have the user make a new class."""
     def __init__(self, course_list: CourseList):
-        super().__init__()
+        super().__init__(course_list)
 
-        self.layout = QVBoxLayout()
-        self.course_list = course_list
         self.complete = False
         save_button = QPushButton("Save Class")
         save_button.setCheckable(True)

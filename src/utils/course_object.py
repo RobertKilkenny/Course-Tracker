@@ -2,7 +2,7 @@
 from typing import List
 
 
-class CourseObject:
+class CourseObject():
     """Class to hold the data of a class for the purposes of this application."""
     def __init__(self, code: str, name: str, credit_count: int, tags: List[str] = None):
         self.__code = code
@@ -86,6 +86,7 @@ class CourseObject:
         return ', '.join(self.__tags)
 
     def print_stats(self) -> None:
+        """A function for debugging to print all stats in the class object."""
         print("\nPrinting stats for class!\n--------------------")
         print(f"Class Code: {self.__code}")
         print(f"Class Name: {self.__name}")
