@@ -4,6 +4,7 @@ from PySide2.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QS
 from my_toolbar import MyToolBar
 from opening_menu import OpeningMenu
 from main_menu import MainMenu
+from utils.app_manager import AppManager
 from utils.process_course_data import CourseList
 from utils.state_enums import StateEnums
 
@@ -14,13 +15,18 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Course Tracker")
         self.app_data = data
+        self.app_manager = AppManager(self)
         try:
             print(self.app_data)
             self.course_list = CourseList(self.app_data["Class Data Path"])
         except ValueError as err:
             print(err)
             self.course_list = CourseList()
-        self.toolbar = MyToolBar(self.show_new_window)
+        self.toolbar = MyToolBar(self.app_manager)
+
+        #Connect events to the proper functions
+        self.app_manager.connect_open_window_request(self.show_new_window)
+        self.app_manager.connect_close_app_request(self.close_application)
 
         # Default to None for error checking
         self.container = None
@@ -36,7 +42,10 @@ class MainWindow(QMainWindow):
         """
         self.toolbar.setVisible(True)
         self.setMinimumSize(QSize(960, 540))
-        self.set_container(MainMenu(self.load_opening_menu, self.toolbar, self.course_list))
+        self.set_container(MainMenu(self.load_opening_menu,
+                                    self.toolbar,
+                                    self.course_list,
+                                    self.app_manager))
         self.container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setCentralWidget(self.container)
 

@@ -7,14 +7,16 @@ from Functions.add_class import AddClass
 from Functions.edit_class import EditClass
 from Functions.generate_csv import GenerateCSV
 from utils.process_course_data import CourseList
+from utils.app_manager import AppManager
 
 class MainMenu(QVBoxLayout):
     """Make the layout"""
-    def __init__(self, load_opening_menu, toolbar: MyToolBar, course_list: CourseList):
+    def __init__(self, load_opening_menu, toolbar: MyToolBar, course_list: CourseList, app_manager: AppManager):
         super().__init__()
         self.setSizeConstraint(QLayout.SetNoConstraint)
         self.toolbar = toolbar
-        self.toolbar.give_stack_shift_func(self.handle_change_subwindow)
+        self.app_manager = app_manager
+        self.app_manager.connect_subwindow_change(self.handle_change_subwindow)
 
         # Create the subwindow to display main content
         self.subwindow_stack = QStackedWidget()
@@ -41,7 +43,7 @@ class MainMenu(QVBoxLayout):
         if not test:
             print("Well, that sucks lol")
         if course_list.csv_file_path is None:
-            self.handle_change_subwindow(-1)
+            self.app_manager.emit_subwindow_change(-1)
 
 
     def grab_generated_csv(self):

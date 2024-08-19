@@ -1,14 +1,14 @@
 from typing import Callable
 from PySide2.QtWidgets import QPushButton, QToolBar
 from Windows.settings_window import SettingsWindow
+from utils.app_manager import AppManager
 
 
 class MyToolBar(QToolBar):
     "Custom Toolbar to handle interactions with application."""
-    def __init__(self, show_new_window: Callable):
+    def __init__(self, app_manager: AppManager):
         super().__init__()
-        self.show_new_window = show_new_window
-        self.change_subwindow_stack = None
+        self.app_manager = app_manager
 
         settings = QPushButton("Settings")
         settings.setCheckable(True)
@@ -24,25 +24,16 @@ class MyToolBar(QToolBar):
         self.addWidget(edit_class)
 
 
-    def give_stack_shift_func(self, func: Callable[[int], None]):
-        """Hand off function to allow for the subwindow to be changed."""
-        self.change_subwindow_stack = func
-
-
     def open_settings(self):
         """Handle opening an additional settings window."""
-        self.show_new_window(new_window=SettingsWindow())
+        self.app_manager.emit_open_window_request(SettingsWindow())
 
 
     def open_add_class(self):
         """Handle changing to the subwindow to the add class widget."""
-        if self.change_subwindow_stack is None:
-            return
-        self.change_subwindow_stack(0)
+        self.app_manager.emit_subwindow_change(0)
 
 
     def open_edit_class(self):
         """Handle changing to the subwindow to the edit class widget."""
-        if self.change_subwindow_stack is None:
-            return
-        self.change_subwindow_stack(1)
+        self.app_manager.emit_subwindow_change(1)
