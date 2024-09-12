@@ -3,13 +3,13 @@ Holds events and listeners so that different events can be handled without expli
 from typing import Callable
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtWidgets import QWidget
-from Functions.generate_csv import GenerateCSV
 
 class AppManager(QObject):
     """Class to faciliate communication between app widgets."""
     __subwindow_change = Signal(int)
     __open_window_request = Signal(QWidget)
     __close_application = Signal()
+    __request_csv = Signal()
     __generated_csv = Signal()
     __can_change_subwindow = True
     gen_csv_widget = None
@@ -75,21 +75,28 @@ class AppManager(QObject):
         self.__close_application.emit()
 
 
-    def connect_generated_csv(self, function: Callable):
-        """Connect Function to the generated_csv Signal
+    def connect_request_csv(self, function: Callable):
+        """Connect functions that should be informed when a proper CSV has been
+        requested to be made or found."""
+        self.__request_csv.connect(function)
 
-        Args:
-            function (Callable): The function that should be signaled on emit
-        """
+
+    def emit_request_csv(self):
+        """Notify different functions that a proper CSV has been requested and
+        locking routing until the CSV has been produced."""
+        self.__request_csv.emit()
+        self.__can_change_subwindow = False
+
+
+    def connect_generated_csv(self, function: Callable):
+        """Connect functions that should be informed when a proper CSV has been
+        created."""
         self.__generated_csv.connect(function)
 
 
     def emit_generated_csv(self):
-        """Notify Main Window to kill app."""
+        """Notify different functions that a proper CSV has been made and
+        handle closing the request page created."""
         self.__generated_csv.emit()
-
-
-    def require_csv_generate(self, gen_csv_widget: GenerateCSV):
-        """Lock app until a csv that can be used is made OR found!"""
-        self.__can_change_subwindow = False
-        self.gen_csv_widget = gen_csv_widget
+        self.__can_change_subwindow = True
+        self.emit_subwindow_change(0)

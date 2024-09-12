@@ -60,12 +60,14 @@ class MainMenu(QVBoxLayout):
         *  0 = Add Class Window
         *  1 = Edit Class Window
         Anything else is the debug window"""
+        if not self.app_manager.can_change_subwindow:
+            return
         print(f"changing to index {index}", end=" = ")
         match index:
             case -1:
                 print("Generate CSV Window")
                 change_to = self.gen_csv_widget
-                self.app_manager.require_csv_generate(self.gen_csv_widget)
+                self.app_manager.emit_request_csv()
             case 0:
                 print("Add Class Window")
                 change_to = self.add_class_widget

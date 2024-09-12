@@ -9,19 +9,41 @@ class MyToolBar(QToolBar):
     def __init__(self, app_manager: AppManager):
         super().__init__()
         self.app_manager = app_manager
+        self.options = []
 
+        #Create the buttons to route to different options
         settings = QPushButton("Settings")
         settings.setCheckable(True)
         settings.clicked.connect(self.open_settings)
-        self.addWidget(settings)
+        self.options.append(settings)
         add_class = QPushButton("Add Class")
         add_class.setCheckable(True)
         add_class.clicked.connect(self.open_add_class)
-        self.addWidget(add_class)
+        self.options.append(add_class)
         edit_class = QPushButton("Edit Class")
         edit_class.setCheckable(True)
         edit_class.clicked.connect(self.open_edit_class)
-        self.addWidget(edit_class)
+        self.options.append(edit_class)
+
+        #Link them to the parent to be displayed
+        for option in self.options:
+            self.addWidget(option)
+
+        #Connect functions to the proper events from App manager
+        self.app_manager.connect_request_csv(self.lock_options)
+        self.app_manager.connect_generated_csv(self.unlock_options)
+
+
+    def lock_options(self):
+        """Lock all routing from the toolbar"""
+        for option in self.options:
+            option.setCheckable(False)
+
+
+    def unlock_options(self):
+        """Reallow routing (For forced events)"""
+        for option in self.options:
+            option.setCheckable(True)
 
 
     def open_settings(self):
