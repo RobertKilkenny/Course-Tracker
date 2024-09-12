@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Generate_CSV_Window</class>
+ <widget class="QDialog" name="Generate_CSV_Window">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1170</width>
+    <height>853</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>0</y>
+     <width>1131</width>
+     <height>271</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="Menu_Holder" stretch="0,1,0,0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetMaximumSize</enum>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item alignment="Qt::AlignHCenter|Qt::AlignBottom">
+     <widget class="QLabel" name="Find_File_Location_Label">
+      <property name="font">
+       <font>
+        <pointsize>20</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Select Existing Course CSV</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="Find_File_Location">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
+      </property>
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="File_Search_Holder">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMinimumSize</enum>
+        </property>
+        <property name="leftMargin">
+         <number>9</number>
+        </property>
+        <item>
+         <widget class="QLineEdit" name="Filepath_LineEdit"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="Browse_File_Explorer">
+          <property name="text">
+           <string>Browse</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QPushButton" name="Submit_File_Location_Button">
+        <property name="text">
+         <string>Save</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item alignment="Qt::AlignHCenter|Qt::AlignBottom">
+     <widget class="QLabel" name="Gen_CSV_Label">
+      <property name="font">
+       <font>
+        <pointsize>20</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Create a Course CSV</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="Gen_CSV_Holder">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMaximumSize</enum>
+      </property>
+      <item>
+       <layout class="QVBoxLayout" name="All_Class_Info_Holder">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMaximumSize</enum>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="Class_Info">
+          <item>
+           <layout class="QVBoxLayout" name="Course_Name_Holder">
+            <item>
+             <widget class="QLabel" name="Course_Name_Label">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Course Name</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="Course_Name_LineEdit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="Course_Code_Holder">
+            <item>
+             <widget class="QLabel" name="Course_Code_Label">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Course Code</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="Course_Code_LineEdit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="Course_Credits_Holder">
+            <item>
+             <widget class="QLabel" name="Course_Credits_Label">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Course Credits</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="Course_Credits_LineEdit"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="Add_Class_Row_Button">
+          <property name="text">
+           <string>Add Class Row</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QPushButton" name="Sumbit_Create_CSV_Button">
+        <property name="text">
+         <string>Generate CSV File</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>Filepath_LineEdit</tabstop>
+  <tabstop>Submit_File_Location_Button</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
