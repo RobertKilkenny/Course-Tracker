@@ -10,7 +10,7 @@ from utils.question_block import NestedQuestionBlock, SimpleQuestionBlock
 
 
 DEFAULT_SETTINGS_FOLDER = "./app-data/data.json"
-DEFAULT_SETTINGS = {"Default App Size": {"height": 500, "width": 500},
+DEFAULT_SETTINGS = {"Default App Size": {"height": 1200, "width": 600},
                     "Class Data Path": "./class.csv",
                     "Settings Data Path": "./app-data/data.json"}
 
@@ -20,7 +20,7 @@ class SettingsWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Application Settings")
-        self.setMinimumSize(QSize(300, 600))
+        self.setMinimumSize(QSize(600, 600))
         self.settings = {}
         self.curr_settings_folder = DEFAULT_SETTINGS_FOLDER
 

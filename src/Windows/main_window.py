@@ -1,5 +1,5 @@
 from PySide2.QtCore import QSize
-from PySide2.QtGui import QIcon
+from PySide2.QtGui import QIcon, QPalette, QColor
 from PySide2.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QSizePolicy
 from my_toolbar import MyToolBar
 from opening_menu import OpeningMenu
@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         """Create the main application to load from the opening window.
         """
         self.toolbar.setVisible(True)
-        self.setMinimumSize(QSize(960, 540))
+        self.setMinimumSize(QSize(1200, 600))
         self.set_container(MainMenu(self.load_opening_menu,
                                     self.toolbar,
                                     self.course_list,

@@ -22,7 +22,8 @@ class MainMenu(QVBoxLayout):
 
         # Create the subwindow to display main content
         self.subwindow_stack = QStackedWidget()
-        self.subwindow_stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.subwindow_stack.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        # self.subwindow_stack.setMinimumHeight(500)
         self.opening_widget = make_opener()
         self.add_class_widget = AddClass(self.course_list, self.app_manager)
         self.add_class_widget.setParent(self)
@@ -41,9 +42,6 @@ class MainMenu(QVBoxLayout):
         self.button.setCheckable(True)
         self.button.clicked.connect(load_opening_menu)
         self.addWidget(self.button)
-        test = self.setAlignment(self.subwindow_stack, Qt.AlignTop)
-        if not test:
-            print("Well, that sucks lol")
         if course_list.csv_file_path is None:
             self.app_manager.emit_subwindow_change(-1)
 
