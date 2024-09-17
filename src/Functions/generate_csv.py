@@ -5,6 +5,8 @@ from utils.process_course_data import CourseList
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
 from utils.question_block import SimpleQuestionBlock
+from utils.course_object import CourseObject
+
 
 class GenerateCSV(SubwindowWidget):
     """Create the window to have the user make a new class."""
@@ -15,6 +17,7 @@ class GenerateCSV(SubwindowWidget):
         self.file_dialog.setNameFilter("CSV File (*.csv)")
 
         self.prompt = GenerateWindowWidget(self)
+        self.courses = self.prompt.class_elements
 
         #Link objects to layout to be displayed
         self.layout.addWidget(self.prompt)
@@ -34,6 +37,13 @@ class GenerateCSV(SubwindowWidget):
 
     def gen_new_csv(self):
         """Use the data given by the user to make a proper CSV file."""
+        result = []
+        for course in self.courses:
+            temp = course.get_values()
+            if temp["code"] is None or temp["name"] is None or temp["credits"] is None:
+                continue
+            result.append(CourseObject(temp["code"], temp["name"], temp["credits"]))
+        self.app_manager.emit_create_csv(result)
 
 
 class GenerateWindowWidget(QWidget):
@@ -160,6 +170,18 @@ class ClassElement(QWidget):
         for value in self.question_dict.values():
             self.layout.addWidget(value)
         self.setLayout(self.layout)
+
+
+    def get_values(self):
+        """Gives all values in the ClassElement, returning a dictionary with 'code', 'name', 
+        and 'credits' with either the value or None values if it isn't valid."""
+        result = {}
+        temp = self.question_dict["course-code"].get_answers()
+        result["code"] = temp if len(temp) == 7 else None
+        temp = self.question_dict["course-name"].get_answers()
+        result["name"] = temp if len(temp) < 3 else None
+        temp = self.question_dict["course-credits"].get_answers()
+        result["credits"] = temp if not isinstance(temp, int) or temp < 1 else None
 
 
 def clear_layout(layout):

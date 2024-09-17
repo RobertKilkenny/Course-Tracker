@@ -80,6 +80,7 @@ class CourseList():
         else:
             return -1
 
+
     def add_class(self, code: str, name: str, value: int, tag_array:List[str] = None,
                 tags_as_string:str = "") -> bool:
         """Adds a new class to the dataframe for the course list.
@@ -157,9 +158,27 @@ class CourseList():
         """_summary_
 
         Raises:
-            ValueError: _description_
+            ValueError: Error to raise
         """
         raise ValueError(msg)
+
+
+    def make_csv_from_list(self, course_list: List[CourseObject]):
+        """Using the pathfile supplied, create a CSV for the app to use.
+
+        Args:
+            course_list (List[CourseObject]): List of all classes
+            that the user wants to be added to the new csv
+        """
+        data = [{
+        'name': course.name,
+        'credits': course.credits,
+        'tags': course.return_tags_as_string()
+        } for course in course_list]
+
+        self._df = pd.DataFrame(data, index=[course.code for course in course_list])
+        self._df.index.name = 'code'
+        self._df.to_csv(self.csv_file_path)
 
 
 def from_string_to_list(tags_string: str) -> List[str]:

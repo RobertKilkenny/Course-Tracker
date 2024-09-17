@@ -1,11 +1,13 @@
 """Object to handle communication between subwindow, extra windows, and the main window.
 Holds events and listeners so that different events can be handled without explicit connections."""
-from typing import Callable
+from typing import Callable, List
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtWidgets import QWidget
+from utils.course_object import CourseObject
 
 class AppManager(QObject):
     """Class to faciliate communication between app widgets."""
+    __create_csv = Signal(List[CourseObject])
     __subwindow_change = Signal(int)
     __open_window_request = Signal(QWidget)
     __close_application = Signal()
@@ -13,6 +15,7 @@ class AppManager(QObject):
     __generated_csv = Signal()
     __can_change_subwindow = True
     gen_csv_widget = None
+
 
     @property
     def can_change_subwindow(self) -> bool:
@@ -90,7 +93,11 @@ class AppManager(QObject):
 
     def connect_generated_csv(self, function: Callable):
         """Connect functions that should be informed when a proper CSV has been
-        created."""
+        created.
+
+        Args:
+            function (Callable): _description_
+        """
         self.__generated_csv.connect(function)
 
 
@@ -100,3 +107,22 @@ class AppManager(QObject):
         self.__generated_csv.emit()
         self.__can_change_subwindow = True
         self.emit_subwindow_change(0)
+
+
+    def connect_create_csv(self, function: Callable):
+        """Connect functions that should be informed when a proper CSV needs to be
+        created.
+
+        Args:
+            function (Callable): _description_
+        """
+        self.__create_csv.connect(function)
+
+
+    def emit_create_csv(self, courses: List[CourseObject]):
+        """Notify Course List to create the CSV from a ClassElement list.
+        
+        Args:
+            courses (List[ClassElement]): A list of all classes wanted to be created.
+        """
+        self.__create_csv.emit(courses)
