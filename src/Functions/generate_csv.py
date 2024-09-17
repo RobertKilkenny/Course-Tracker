@@ -1,10 +1,10 @@
+from typing import Dict
 from PySide2.QtWidgets import QWidget, QLabel, QScrollArea, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QFileDialog, QSizePolicy
-from PySide2.QtGui import QFont, QPalette, QColor
-from PySide2.QtCore import QRegExp, Qt
+from PySide2.QtGui import QFont, QPalette, QColor, QRegExpValidator
+from PySide2.QtCore import QRegExp
 from utils.process_course_data import CourseList
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
-from utils.question_block import SimpleQuestionBlock
 from utils.course_object import CourseObject
 
 
@@ -43,26 +43,23 @@ class GenerateCSV(SubwindowWidget):
             if temp["code"] is None or temp["name"] is None or temp["credits"] is None:
                 continue
             result.append(CourseObject(temp["code"], temp["name"], temp["credits"]))
-        self.app_manager.emit_create_csv(result)
+        if len(result) > 0:
+            print(result)
+            self.app_manager.emit_create_csv(result)
 
 
 class GenerateWindowWidget(QWidget):
-    """Seperate class to define the widgets for the window (done seperately to make the 
+    """Separate class to define the widgets for the window (done separately to make the 
     class object less cluttered)."""
 
     def __init__(self, parent_window: GenerateCSV):
         super().__init__(None)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         layout = QVBoxLayout()
-        self.num_classes_edit = 0
+        self.row_count = 0
         self.class_elements = []
 
-        palette = self.palette()
-        palette.setColor(QPalette.Window, QColor("blue"))
-        self.setPalette(palette)
-        self.setAutoFillBackground(True)
-
-        #Create Option 1: Find a new CSV to Check
+        # Create Option 1: Find a new CSV to Check
         self.find_file_label = QLabel()
         font = QFont()
         font.setBold(True)
@@ -86,7 +83,7 @@ class GenerateWindowWidget(QWidget):
         self.find_file_widget.setLayout(find_file_layout)
         layout.addWidget(self.find_file_widget)
 
-        #Create Option 2: Aid the user in making a new CSV
+        # Create Option 2: Aid the user in making a new CSV
         self.make_csv_label = QLabel()
         font = QFont()
         font.setBold(True)
@@ -94,6 +91,7 @@ class GenerateWindowWidget(QWidget):
         self.make_csv_label.setFont(font)
         self.make_csv_label.setText("Make a New CSV")
         layout.addWidget(self.make_csv_label)
+
         self.notice = QLabel()
         font = QFont()
         font.setPointSize(10)
@@ -106,13 +104,13 @@ class GenerateWindowWidget(QWidget):
         submit_new_csv_btn = QPushButton(parent=self, text="Generate a CSV with this information!")
         submit_new_csv_btn.clicked.connect(parent_window.gen_new_csv)
 
-        # Make SubWidget for user to add classes
+        # SubWidget for user to add classes
         self.add_classes_widget = QWidget()
         self.add_classes_scroll = QScrollArea()
         self.add_classes_layout = QVBoxLayout()
         make_new_row_btn = QPushButton(parent=self.add_classes_widget, text="Add new class")
         make_new_row_btn.clicked.connect(self.make_new_row)
-        self.add_classes_layout.addWidget(make_new_row_btn, alignment=Qt.AlignBottom)
+
         palette = self.add_classes_widget.palette()
         palette.setColor(QPalette.Window, QColor("darkgray"))
         self.add_classes_widget.setPalette(palette)
@@ -122,31 +120,25 @@ class GenerateWindowWidget(QWidget):
         self.add_classes_scroll.setWidget(self.add_classes_widget)
         self.add_classes_scroll.setWidgetResizable(True)
         make_csv_layout.addWidget(self.add_classes_scroll)
+        make_csv_layout.addWidget(make_new_row_btn)
         make_csv_layout.addWidget(submit_new_csv_btn)
         make_csv_widget.setLayout(make_csv_layout)
         layout.addWidget(make_csv_widget)
 
-        #Connect all the work to the Base Widget and send it back!
         self.setLayout(layout)
-
 
     def make_new_row(self):
         """Make a new row for the user to enter data into."""
-        self.num_classes_edit = self.num_classes_edit + 1
-        self.remake_add_classes_widget()
-
+        class_element_widget = ClassElement()  # Create a new ClassElement instance
+        self.class_elements.append(class_element_widget)  # Add to the list
+        self.add_classes_layout.addWidget(class_element_widget)  # Add the widget to the layout
+        self.row_count = len(self.class_elements)  # Update row count
 
     def remake_add_classes_widget(self):
-        """Update widget when changes are made."""
-        clear_layout(self.add_classes_layout)
-        for _ in range(self.num_classes_edit):
-            class_element_widget = ClassElement()
-            self.class_elements.append(class_element_widget)
-            self.add_classes_layout.addWidget(class_element_widget)
-
-        make_new_row_btn = QPushButton(parent=self.add_classes_widget, text="Add new class")
-        make_new_row_btn.clicked.connect(self.make_new_row)
-        self.add_classes_layout.addWidget(make_new_row_btn, alignment=Qt.AlignBottom)
+        """Rebuild the widget when changes are made."""
+        clear_layout(self.add_classes_layout)  # Clear the layout
+        for element in self.class_elements:  # Re-add all the existing class elements
+            self.add_classes_layout.addWidget(element)
         self.add_classes_widget.setLayout(self.add_classes_layout)
 
 
@@ -154,38 +146,42 @@ class ClassElement(QWidget):
     """Class for each list element inside of add class for making new CSV"""
     def __init__(self):
         super().__init__(None)
-        self.question_dict = {}
-        self.question_dict["course-code"] = SimpleQuestionBlock(
-            question="Input the new course code",
-            placeholder="Put course code [ex. AAA0000]",
-            regex=QRegExp("[A-Z]{3}[0-9]{4}"))
-        self.question_dict["course-name"] = SimpleQuestionBlock(
-            question="What is the name of the course",
-            placeholder="Must be at least 3 characters long",
-            regex=QRegExp(r"^[\w\s\-]+$"))
-        self.question_dict["course-credits"] = SimpleQuestionBlock(
-            question="Credit value",
-            regex=QRegExp("[0-9]"))
+        self.question_dict: Dict[str, QLineEdit] = {}
+        self.question_dict["course-code"] = QLineEdit()
+        self.question_dict["course-code"].setPlaceholderText("Put course code [ex. AAA0000]")
+        self.question_dict["course-code"].setValidator(QRegExpValidator(QRegExp("[A-Z]{3}[0-9]{4}")))
+
+        self.question_dict["course-name"] = QLineEdit()
+        self.question_dict["course-name"].setPlaceholderText("Must be at least 3 characters long")
+        self.question_dict["course-name"].setValidator(QRegExpValidator(QRegExp(r"^[\w\s\-]+$")))
+
+        self.question_dict["course-credits"] = QLineEdit()
+        self.question_dict["course-credits"].setPlaceholderText("Credit value")
+        self.question_dict["course-credits"].setValidator(QRegExpValidator(QRegExp("[0-9]")))
+
         self.layout = QHBoxLayout()
         for value in self.question_dict.values():
             self.layout.addWidget(value)
         self.setLayout(self.layout)
 
-
     def get_values(self):
-        """Gives all values in the ClassElement, returning a dictionary with 'code', 'name', 
-        and 'credits' with either the value or None values if it isn't valid."""
+        """Returns a dictionary with 'code', 'name', and 'credits' or None if values are invalid."""
         result = {}
-        temp = self.question_dict["course-code"].get_answers()
+        temp = self.question_dict["course-code"].text()
         result["code"] = temp if len(temp) == 7 else None
-        temp = self.question_dict["course-name"].get_answers()
-        result["name"] = temp if len(temp) < 3 else None
-        temp = self.question_dict["course-credits"].get_answers()
-        result["credits"] = temp if not isinstance(temp, int) or temp < 1 else None
+
+        temp = self.question_dict["course-name"].text()
+        result["name"] = temp if len(temp) > 2 else None
+
+        temp = self.question_dict["course-credits"].text()
+        result["credits"] = None
+        if len(temp) > 0:
+            result["credits"] = int(temp)
+        return result
 
 
 def clear_layout(layout):
-    """Remove all widgets and layouts from the given layout"""
+    """Remove all widgets and layouts from the given layout."""
     while layout.count():
         child = layout.takeAt(0)
         if child.widget():

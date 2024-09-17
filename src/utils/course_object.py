@@ -10,6 +10,19 @@ class CourseObject():
         self.__credits = credit_count
         self.__tags = [] if tags is None else tags
 
+
+    def __str__(self) -> str:
+        val = f"({self.__name} (Code: {self.__code})\n   *Credits: {self.__credits}"
+        if len(self.__tags) > 0:
+            val = val + f"\n   *tags: {self.__tags}"
+        val = val + ")\r"
+        return val
+
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
     @property
     def code(self) -> str:
         """Property for class code."""

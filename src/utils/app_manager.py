@@ -7,7 +7,7 @@ from utils.course_object import CourseObject
 
 class AppManager(QObject):
     """Class to faciliate communication between app widgets."""
-    __create_csv = Signal(List[CourseObject])
+    __create_csv = Signal(object)
     __subwindow_change = Signal(int)
     __open_window_request = Signal(QWidget)
     __close_application = Signal()
