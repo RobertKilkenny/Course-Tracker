@@ -170,6 +170,7 @@ class CourseList():
             course_list (List[CourseObject]): List of all classes
             that the user wants to be added to the new csv
         """
+        print("Creating CSV :\n", course_list)
         data = [{
         'name': course.name,
         'credits': course.credits,
@@ -178,7 +179,9 @@ class CourseList():
 
         self._df = pd.DataFrame(data, index=[course.code for course in course_list])
         self._df.index.name = 'code'
-        self._df.to_csv(self.csv_file_path)
+        print("Finished DF being printed:\n", self._df)
+        print("Printing CSV to location:", self.csv_file_path)
+        self._df.to_csv(path_or_buf=self.csv_file_path)
 
 
 def from_string_to_list(tags_string: str) -> List[str]:

@@ -14,8 +14,7 @@ class AppManager(QObject):
     __request_csv = Signal()
     __generated_csv = Signal()
     __can_change_subwindow = True
-    gen_csv_widget = None
-
+    
 
     @property
     def can_change_subwindow(self) -> bool:
@@ -96,7 +95,7 @@ class AppManager(QObject):
         created.
 
         Args:
-            function (Callable): _description_
+            function (Callable): The function that should be called on emit
         """
         self.__generated_csv.connect(function)
 
@@ -104,7 +103,6 @@ class AppManager(QObject):
     def emit_generated_csv(self):
         """Notify different functions that a proper CSV has been made and
         handle closing the request page created."""
-        self.__generated_csv.emit()
         self.__can_change_subwindow = True
         self.emit_subwindow_change(0)
 

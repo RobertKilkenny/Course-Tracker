@@ -49,15 +49,20 @@ class MainMenu(QVBoxLayout):
     def grab_generated_csv(self):
         """Called by the GenerateCSV Object when it is ready to pull
         the data and make the backup dataframe."""
-        self.gen_csv_widget.get_csv_path()
+        value  = self.gen_csv_widget.get_csv_path()
+        if value is not None:
+            self.course_list.csv_file_path = value
+            self.app_manager.emit_subwindow_change(0)
 
 
     def handle_change_subwindow(self, index: int):
         """Change the subwindow via an index reference
+        Args:
+            index (int): the value for the subwindow (see legend below)
         * -1 = Gen CSV Window
         *  0 = Add Class Window
         *  1 = Edit Class Window
-        Anything else is the debug window"""
+        * Note: Anything else is the debug window"""
         if not self.app_manager.can_change_subwindow:
             return
         print(f"changing to index {index}", end=" = ")

@@ -1,7 +1,8 @@
 from typing import Dict
+import os
 from PySide2.QtWidgets import QWidget, QLabel, QScrollArea, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QFileDialog, QSizePolicy
 from PySide2.QtGui import QFont, QPalette, QColor, QRegExpValidator
-from PySide2.QtCore import QRegExp
+from PySide2.QtCore import QRegExp, QSize
 from utils.process_course_data import CourseList
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
@@ -15,9 +16,12 @@ class GenerateCSV(SubwindowWidget):
         self.file_dialog = QFileDialog(self)
         self.file_dialog.setFileMode(QFileDialog.ExistingFile)
         self.file_dialog.setNameFilter("CSV File (*.csv)")
+        self.popup = QWidget()
 
         self.prompt = GenerateWindowWidget(self)
+        self.prompt.filepath_line_edit.setText(self.gen_default_csv_path())
         self.courses = self.prompt.class_elements
+        self.__csv_file_path = None
 
         #Link objects to layout to be displayed
         self.layout.addWidget(self.prompt)
@@ -27,24 +31,89 @@ class GenerateCSV(SubwindowWidget):
     def handle_find_file(self):
         """Opens a file explorer window so that the user can lead the app
         to where their existing csv file is."""
+        dir_list = self.prompt.filepath_line_edit.text().split("\\")
+        if len(dir_list) > 1:
+            if len(dir_list[-1]) > 4 and dir_list[-1][-4:] == ".csv":
+                dir_list = dir_list[:-1]
+            dir_path = "\\".join(dir_list)
+            if os.path.exists(dir_path):
+                self.file_dialog.setDirectory(dir_path)
         self.app_manager.emit_open_window_request(self.file_dialog)
 
 
-    def check_if_new_path_works(self):
+    def check_if_new_path_works(self) -> bool:
         """Used to see if user gave a CSV with correct formatting."""
-        self.app_manager.emit_generated_csv()
+        selected_file = self.prompt.filepath_line_edit.text()
+        if selected_file:
+            if isinstance(selected_file, str) and os.path.exists(selected_file):
+                self.app_manager.emit_generated_csv()
+                self.__csv_file_path = selected_file
+                return True
+            else:
+                print(f'The selected file ("{selected_file}") does not exist.')
+        else:
+            print("No file was selected.")
+            self.__csv_file_path = self.gen_default_csv_path()
+            self.prompt.filepath_line_edit.setText(self.gen_default_csv_path())
+        return False
 
 
-    def gen_new_csv(self):
+    def gen_default_csv_path(self) -> str:
+        """Create a baseline csv location that could hold the data.
+
+        Returns:
+            path (str): returns the generic csv location
+        """
+        temp = os.path.dirname(os.path.abspath(__file__)).split("\\")[:-2]
+        path = "\\".join(temp)
+        return os.path.join(path, "app-data", "classes.csv")
+
+
+    def get_csv_path(self) -> str | None:
+        """Pull the the CSV path if it is valid.
+
+        Returns:
+            path (str | None): The literal path of the csv or None if the path is invalid
+        """
+        return self.__csv_file_path
+
+
+    def popup_for_gen_new_csv(self):
+        """Handle making a popup to make sure that the user wants the new CSV saved at the path
+        saved."""
+        self.popup.setFixedSize(QSize(500, 250))
+        self.popup.setWindowTitle("Are you sure?")
+        layout = QVBoxLayout()
+        label = QLabel("The CSV will be saved here:")
+        data = QLineEdit()
+        data.setText(self.prompt.filepath_line_edit.text())
+        layout.addWidget(label)
+        layout.addWidget(data)
+
+        button_holder_layout = QHBoxLayout()
+        accept_btn = QPushButton(text="accept")
+        accept_btn.clicked.connect(self.__gen_new_csv)
+        decline_btn = QPushButton(text="go back")
+        decline_btn.clicked.connect(self.popup.close)
+        button_holder_layout.addWidget(accept_btn)
+        button_holder_layout.addWidget(decline_btn)
+        button_holder = QWidget()
+        button_holder.setLayout(button_holder_layout)
+        layout.addWidget(button_holder)
+        self.popup.setLayout(layout)
+        self.app_manager.emit_open_window_request(self.popup)
+
+
+    def __gen_new_csv(self):
         """Use the data given by the user to make a proper CSV file."""
         result = []
+        self.popup.close()
         for course in self.courses:
             temp = course.get_values()
             if temp["code"] is None or temp["name"] is None or temp["credits"] is None:
                 continue
             result.append(CourseObject(temp["code"], temp["name"], temp["credits"]))
         if len(result) > 0:
-            print(result)
             self.app_manager.emit_create_csv(result)
 
 
@@ -71,12 +140,13 @@ class GenerateWindowWidget(QWidget):
         self.find_file_widget = QWidget()
         find_file_layout = QVBoxLayout()
         file_search_holder = QHBoxLayout()
-        filepath_line_edit = QLineEdit(parent=self)
+        self.filepath_line_edit = QLineEdit(parent=self)
         browse_file_explorer = QPushButton(parent=self, text="Browse...")
+        browse_file_explorer.clicked.connect(parent_window.handle_find_file)
         submit_file_location_btn = QPushButton(parent=self, text="Save CSV File Path")
         submit_file_location_btn.clicked.connect(parent_window.check_if_new_path_works)
 
-        file_search_holder.addWidget(filepath_line_edit)
+        file_search_holder.addWidget(self.filepath_line_edit)
         file_search_holder.addWidget(browse_file_explorer)
         find_file_layout.addLayout(file_search_holder)
         find_file_layout.addWidget(submit_file_location_btn)
@@ -102,7 +172,7 @@ class GenerateWindowWidget(QWidget):
         make_csv_widget = QWidget()
         make_csv_layout = QVBoxLayout()
         submit_new_csv_btn = QPushButton(parent=self, text="Generate a CSV with this information!")
-        submit_new_csv_btn.clicked.connect(parent_window.gen_new_csv)
+        submit_new_csv_btn.clicked.connect(parent_window.popup_for_gen_new_csv)
 
         # SubWidget for user to add classes
         self.add_classes_widget = QWidget()
@@ -149,7 +219,8 @@ class ClassElement(QWidget):
         self.question_dict: Dict[str, QLineEdit] = {}
         self.question_dict["course-code"] = QLineEdit()
         self.question_dict["course-code"].setPlaceholderText("Put course code [ex. AAA0000]")
-        self.question_dict["course-code"].setValidator(QRegExpValidator(QRegExp("[A-Z]{3}[0-9]{4}")))
+        self.question_dict["course-code"].setValidator(
+            QRegExpValidator(QRegExp("[A-Z]{3}[0-9]{4}")))
 
         self.question_dict["course-name"] = QLineEdit()
         self.question_dict["course-name"].setPlaceholderText("Must be at least 3 characters long")
