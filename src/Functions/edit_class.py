@@ -1,6 +1,5 @@
 from PySide2.QtWidgets import QPushButton
 from PySide2.QtCore import QRegExp, QPoint
-from utils.process_course_data import CourseList
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
 from utils.question_block import SimpleQuestionBlock
@@ -9,8 +8,8 @@ from Windows.popup_window import PopupWindow
 
 class EditClass(SubwindowWidget):
     """This is the subwindow to edit an existing class"""
-    def __init__(self, course_list: CourseList, app_manager: AppManager):
-        super().__init__(course_list, app_manager)
+    def __init__(self, app_manager: AppManager):
+        super().__init__(app_manager)
         self.popup = None
 
         self.user_class_choice = SimpleQuestionBlock(
@@ -55,14 +54,13 @@ class EditClass(SubwindowWidget):
         message = ""
         result = False
         user_input = self.user_class_choice.input.text()
-        match handle_check(user_input, self.course_list):
+        match self.handle_check(user_input):
             case -1:
                 message = f"Code given \"{user_input}\" was invalid (not in the format AAA0000)!"
             case 1:
                 message = f"Code given \"{user_input}\" was not found in the class catalog!"
             case 0:
                 message = f"Code given\"{user_input}\" was found in the class catalog!"
-                self.course_list.return_class(user_input).print_stats()
                 result = True
             case _:
                 message = "ERROR: function gave back invalid code!"
@@ -88,11 +86,11 @@ class EditClass(SubwindowWidget):
         self.popup.close()
 
 
-def handle_check(code: str, course_list: CourseList):
-    """Checks if the user given class code is valid and if it exists in the dataset.
-    Returns 0 if valid, -1 if the input is invalid and 1 if it does not exist in the dataset."""
-    if len(code) < 7:
-        return -1
-    if  course_list.does_class_exist(code):
-        return 0
-    return 1
+    def handle_check(self, code: str):
+        """Checks if the user given class code is valid and if it exists in the dataset.
+        Returns 0 if valid, -1 if the input is invalid and 1 if it does not exist in the dataset."""
+        if len(code) < 7:
+            return -1
+        if  self.app_manager.does_class_exist(code):
+            return 0
+        return 1

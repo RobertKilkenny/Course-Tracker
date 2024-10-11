@@ -1,9 +1,11 @@
 """Object to handle communication between subwindow, extra windows, and the main window.
 Holds events and listeners so that different events can be handled without explicit connections."""
+import os
 from typing import Callable, List
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtWidgets import QWidget
 from utils.course_object import CourseObject
+from utils.process_course_data import CourseList
 
 class AppManager(QObject):
     """Class to faciliate communication between app widgets."""
@@ -14,7 +16,7 @@ class AppManager(QObject):
     __request_csv = Signal()
     __generated_csv = Signal()
     __can_change_subwindow = True
-    
+
 
     @property
     def can_change_subwindow(self) -> bool:
@@ -22,6 +24,12 @@ class AppManager(QObject):
         return self.__can_change_subwindow
 
 
+    def __init__(self, course_list: CourseList, parent: QObject | None = ...) -> None:
+        super().__init__(parent)
+        self.course_list = course_list
+
+
+#region Handle connecting and emitting Signals
     def connect_subwindow_change(self, function: Callable):
         """Connect Function to the subwindow_change Signal
 
@@ -105,22 +113,84 @@ class AppManager(QObject):
         handle closing the request page created."""
         self.__can_change_subwindow = True
         self.emit_subwindow_change(0)
+#endregion
 
 
-    def connect_create_csv(self, function: Callable):
-        """Connect functions that should be informed when a proper CSV needs to be
-        created.
+#region CourseList Access points
+    def does_class_exist(self, code: str) -> bool:
+        """Checks if the class already exists using the course code 
+        which is the index for the dataframe.
 
         Args:
-            function (Callable): _description_
+            course_code (str): Code to search with within the dataframe.
+
+        Returns:
+            bool: Returns if the course code is found in the dataframe.
         """
-        self.__create_csv.connect(function)
+        self.course_list.does_class_exist(code)
 
 
-    def emit_create_csv(self, courses: List[CourseObject]):
-        """Notify Course List to create the CSV from a ClassElement list.
-        
+    def change_csv_location(self, new_location: str, is_new_file: bool = False) -> bool:
+        """Change the path for the CSV and create a new DF if it is a new file
+
         Args:
-            courses (List[ClassElement]): A list of all classes wanted to be created.
+            new_location (str): New absolute path for the file
+            is_new_file (bool, optional): Boolean to identify if a new dataframe be created
+                (Defaults to False).
+
+        Returns:
+            bool: Returns if the change was successful
         """
-        self.__create_csv.emit(courses)
+        if is_new_file:
+            return self.course_list.create_dataframe_from_csv(new_location) == 0
+        else:
+            self.course_list.csv_location = new_location
+
+        return True
+
+
+    def add_class(self, code: str, name: str, value: int, tag_array:List[str] = None,
+                tags_as_string:str = "") -> int:
+        """Adds a new class to the dataframe for the course list.
+
+        Args:
+            code (str): The course code for the class to be added. Default format is 'AAA0000'
+            name (str): The name for the course.
+            value (int): The number of credits for the class.
+            tag_array (List[str], optional): A array holding different relevant tags.
+            Defaults to None.
+            tags_as_string (str, optional): a string of all tags delimited by a '|'. Defaults to "".
+
+        Returns:
+            int: Enumerable to define what happened
+                * 0: Succeeded
+                * 1: Failed because vital info was missing
+                * 2: Failed as it already exists
+        """
+        if tags_as_string != "" and tag_array is None:
+            tag_array = tags_as_string.split("|")
+        return self.add_class_from_object(CourseObject(code,name,value,tag_array))
+
+
+    def add_class_from_object(self, new_class: CourseObject) -> int:
+        """Attempts to add a new class to the dataframe.
+
+        Args:
+            new_class (CourseObject): The new class being requested to be added
+
+        Returns:
+            int: Enumerable to define what happened
+                * 0: Succeeded
+                * 1: Failed because vital info was missing
+                * 2: Failed as it already exists
+        """
+        if self.course_list.does_class_exist(new_class.code):
+            return 2
+        if not new_class.is_valid_class():
+            return 1
+        try:
+            self.course_list.add_class_from_object()
+        except Exception as e:
+            print(e)
+            return -1
+#endregion

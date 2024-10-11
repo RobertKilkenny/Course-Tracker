@@ -1,9 +1,8 @@
 from typing import Dict
 import os
-from PySide2.QtWidgets import QWidget, QLabel, QScrollArea, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QFileDialog, QSizePolicy
+from PySide2.QtWidgets import QWidget, QLabel, QScrollArea, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QFileDialog, QSizePolicy, QMessageBox
 from PySide2.QtGui import QFont, QPalette, QColor, QRegExpValidator
 from PySide2.QtCore import QRegExp, QSize
-from utils.process_course_data import CourseList
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
 from utils.course_object import CourseObject
@@ -11,11 +10,12 @@ from utils.course_object import CourseObject
 
 class GenerateCSV(SubwindowWidget):
     """Create the window to have the user make a new class."""
-    def __init__(self, course_list: CourseList, app_manager: AppManager):
-        super().__init__(course_list, app_manager)
+    def __init__(self, app_manager: AppManager):
+        super().__init__(app_manager)
         self.file_dialog = QFileDialog(self)
         self.file_dialog.setFileMode(QFileDialog.ExistingFile)
         self.file_dialog.setNameFilter("CSV File (*.csv)")
+        self.file_dialog.fileSelected.connect(self.update_file_path)
         self.popup = QWidget()
 
         self.prompt = GenerateWindowWidget(self)
@@ -41,6 +41,13 @@ class GenerateCSV(SubwindowWidget):
         self.app_manager.emit_open_window_request(self.file_dialog)
 
 
+    def update_file_path(self, file_path):
+        """Updates the QLineEdit with the new file path when a file is selected."""
+        if os.path.isfile(file_path):
+            self.prompt.filepath_line_edit.setText(file_path)
+            self.check_if_new_path_works()
+
+
     def check_if_new_path_works(self) -> bool:
         """Used to see if user gave a CSV with correct formatting."""
         selected_file = self.prompt.filepath_line_edit.text()
@@ -50,12 +57,19 @@ class GenerateCSV(SubwindowWidget):
                 self.__csv_file_path = selected_file
                 return True
             else:
-                print(f'The selected file ("{selected_file}") does not exist.')
+                msg_box = QMessageBox()
+                msg_box.setIcon(QMessageBox.Warning)
+                msg_box.setText(f'The selected file ("{selected_file}") does not exist.')
+                msg_box.setWindowTitle("File Error")
+                msg_box.exec_()
         else:
-            print("No file was selected.")
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Information)
+            msg_box.setText("No file was selected.")
+            msg_box.setWindowTitle("No File Selected")
+            msg_box.exec_()
             self.__csv_file_path = self.gen_default_csv_path()
-            self.prompt.filepath_line_edit.setText(self.gen_default_csv_path())
-        return False
+            self.prompt.filepath_line_edit.setText(self.__csv_file_path)
 
 
     def gen_default_csv_path(self) -> str:
@@ -114,7 +128,8 @@ class GenerateCSV(SubwindowWidget):
                 continue
             result.append(CourseObject(temp["code"], temp["name"], temp["credits"]))
         if len(result) > 0:
-            self.app_manager.emit_create_csv(result)
+            result = self.app_manager.change_csv_location(self.__csv_file_path, True)
+            print(result)
 
 
 class GenerateWindowWidget(QWidget):

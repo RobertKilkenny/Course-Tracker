@@ -15,13 +15,13 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Course Tracker")
         self.app_data = data
-        self.app_manager = AppManager(self)
         try:
             print(self.app_data)
             self.course_list = CourseList(self.app_data["Class Data Path"])
         except ValueError as err:
             print(err)
             self.course_list = CourseList()
+        self.app_manager = AppManager(self.course_list, self)
         self.toolbar = MyToolBar(self.app_manager)
 
         #Connect events to the proper functions
@@ -42,7 +42,6 @@ class MainWindow(QMainWindow):
         """
         self.toolbar.setVisible(True)
         self.setMinimumSize(QSize(1200, 600))
-        self.app_manager.connect_create_csv(self.course_list.make_csv_from_list)
         self.set_container(MainMenu(self.load_opening_menu,
                                     self.toolbar,
                                     self.course_list,

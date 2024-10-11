@@ -12,15 +12,23 @@ EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode"],
 
 class CourseList():
     """Class Object to hold the data of a class for the purposes of this application."""
-    csv_file_path: str
+
+#region Properties
+    @property
+    def csv_location(self):
+        """Get absolute file location for CSV holding class data."""
+        return self._csv_location
+
+    @csv_location.setter
+    def csv_location(self, csv_location: str):
+        """Set absolute file location for CSV holding class data."""
+        self._csv_location = csv_location
 
     @property
     def df(self):
+        """Get a copy of the data for all classes."""
         return self._df
-
-    @df.setter
-    def df(self, df):
-        self._df = df
+#endregion
 
     def __init__(self, course_csv_location: str = None):
         """_summary_
@@ -28,7 +36,7 @@ class CourseList():
         Args:
             course_csv_location (str): Where the csv for the course data is located
         """
-        self.csv_file_path = course_csv_location
+        self.csv_location = course_csv_location
         if course_csv_location is None:
             self._df = pd.DataFrame()
             return
@@ -55,15 +63,27 @@ class CourseList():
               self.df)
 
 
-    def create_dataframe_from_csv(self):
+#region Unique functions
+    def create_dataframe_from_csv(self, location: str = None):
         """Read a csv file to make the dataframe for the app.
+        Args:
+            location (str, optional): Passes in a new location
 
         Returns:
-            int: Returns an enum to tell
+            int: Returns an enum to tell if it succeeded or how it failed.
+                * -1: File path does not exist
+                * 0: Succeeded
+                * 1: File is not formatted correctly
         """
-        if os.path.exists(self.csv_file_path):
+        if location is not None:
+            if os.path.exists(location):
+                self.csv_location = location
+            else:
+                return -1
+        
+        if os.path.exists(self.csv_location):
             print("CSV is generating the dataframe")
-            temp = pd.read_csv(self.csv_file_path)
+            temp = pd.read_csv(self.csv_location)
 
             required_columns = ["Course Code", "Course Name", "Credits"]
             if all(column in temp.columns for column in required_columns):
@@ -105,6 +125,18 @@ class CourseList():
         self.df.at[code, "Tags"] = result
 
 
+    def add_class_from_object(self, course: CourseObject) -> bool:
+        """Add class using CourseObject instead of literal values
+
+        Args:
+            course (CourseObject): Course to add
+
+        Returns:
+            bool: Returns if it worked
+        """
+        return self.add_class(course.code, course.name, course.credits, course.tags)
+
+
     def does_class_exist(self, course_code: str) -> bool:
         """Checks if the class already exists using the course code 
         which is the index for the dataframe.
@@ -144,14 +176,25 @@ class CourseList():
 
 
     def print_csv(self):
-        """_summary_"""
+        """Prints the dataframe to console and saves it to CSV."""
         print("\nPrinting dataframe!",
-              "\n------------------------------------------")
+            "\n------------------------------------------")
+
         temp = self.df.copy()
+        
+        # Check if 'Tags' column exists, if not, create it with empty lists
+        if "Tags" not in temp.columns:
+            temp["Tags"] = [[] for _ in range(len(temp))]
+        
+        # Fill NaN values in the "Tags" column with empty lists before applying conversion
+        temp["Tags"] = temp["Tags"].apply(lambda tags: [] if pd.isna(tags) else tags)
+        
+        # Convert lists of tags to strings
         temp["Tags"] = temp["Tags"].apply(from_list_to_string)
+
         temp.rename_axis("Course Code", inplace=True)
         print(temp)
-        temp.to_csv(self.csv_file_path, index_label="Course Code")
+        temp.to_csv(self.csv_location, index_label="Course Code")
 
 
     def __send_error(self, msg:str):
@@ -179,11 +222,13 @@ class CourseList():
 
         self._df = pd.DataFrame(data, index=[course.code for course in course_list])
         self._df.index.name = 'code'
+
         print("Finished DF being printed:\n", self._df)
-        print("Printing CSV to location:", self.csv_file_path)
-        self._df.to_csv(path_or_buf=self.csv_file_path)
+        print("Printing CSV to location:", self.csv_location)
+        self._df.to_csv(path_or_buf=self.csv_location)
+#endregion
 
-
+#region External Functions
 def from_string_to_list(tags_string: str) -> List[str]:
     """Create a List from a string that delimited by a '|'.
 
@@ -198,7 +243,7 @@ def from_string_to_list(tags_string: str) -> List[str]:
     return tags_string.split("|")
 
 
-def from_list_to_string(tag_list: List[str]) -> str:
+def from_list_to_string(tag_list: List[str]| None) -> str:
     """Create a string that delimits each element in the list with a '|'.
 
     Args:
@@ -207,8 +252,12 @@ def from_list_to_string(tag_list: List[str]) -> str:
     Returns:
         str: The list transformed into a string.
     """
+    if tag_list is None:
+        return "No tags!"
+    
     if not all(isinstance(tag, str) for tag in tag_list):
         for element in tag_list:
             if not isinstance(element, str):
                 tag_list.remove(element)
     return "|".join(tag_list)
+#endregion

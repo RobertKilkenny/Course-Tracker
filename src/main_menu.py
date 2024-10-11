@@ -25,11 +25,11 @@ class MainMenu(QVBoxLayout):
         self.subwindow_stack.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         # self.subwindow_stack.setMinimumHeight(500)
         self.opening_widget = make_opener()
-        self.add_class_widget = AddClass(self.course_list, self.app_manager)
+        self.add_class_widget = AddClass(self.app_manager)
         self.add_class_widget.setParent(self)
-        self.edit_class_widget = EditClass(self.course_list, self.app_manager)
+        self.edit_class_widget = EditClass(self.app_manager)
         self.edit_class_widget.setParent(self)
-        self.gen_csv_widget = GenerateCSV(self.course_list, self.app_manager)
+        self.gen_csv_widget = GenerateCSV(self.app_manager)
         self.gen_csv_widget.setParent(self)
         self.subwindow_stack.addWidget(self.opening_widget)
         self.subwindow_stack.addWidget(self.add_class_widget)
@@ -42,7 +42,7 @@ class MainMenu(QVBoxLayout):
         self.button.setCheckable(True)
         self.button.clicked.connect(load_opening_menu)
         self.addWidget(self.button)
-        if course_list.csv_file_path is None:
+        if course_list.csv_location is None:
             self.app_manager.emit_subwindow_change(-1)
 
 
