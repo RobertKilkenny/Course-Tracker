@@ -47,7 +47,8 @@ class MainWindow(QMainWindow):
         self.set_container(MainMenu(self.load_opening_menu,
                                     self.toolbar,
                                     self.course_list,
-                                    self.app_manager))
+                                    self.app_manager,
+                                    self.app_data))
         self.container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setCentralWidget(self.container)
 

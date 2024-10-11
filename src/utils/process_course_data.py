@@ -8,7 +8,10 @@ from utils.course_object import CourseObject
 
 EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode", "Code", "code"],
                   "Course Name": ["course name", "coursename", "Name", "name"],
-                  "Credits": ["credit", "credits", "value", "credit hours", "credithours"]}
+                  "Credits": ["Credit", "credit", "credits", "value", "Credit Hours", 
+                              "Credit hours","credit Hours","credit hours","credithours"],
+                  "Semester": ["semester"],
+                  "Grade": ["grade"]}
 
 class CourseList():
     """Class Object to hold the data of a class for the purposes of this application."""
@@ -101,12 +104,11 @@ class CourseList():
             return 1
 
         # Rename the columns to the expected names
-        temp.rename(columns={
-            'code': 'Course Code',
-            'name': 'Course Name',
-            'credits': 'Credits',
-            'tags': 'Tags'
-        }, inplace=True)
+        for column in temp.columns:
+            for category, typos in EXPECTED_TYPOS.items():
+                if column.lower() in map(str.lower, typos):
+                    temp.rename(columns={column: category}, inplace=True)
+                    break
 
         # Check if required columns are present
         required_columns = ["Course Code", "Course Name", "Credits"]
@@ -114,11 +116,25 @@ class CourseList():
             self._df = temp
             self._df.set_index(['Course Code'], inplace=True)
 
+            # Handle NaN values in the Grades column (if present)
+            if "Semester" in temp.columns:
+                self._df["Semester"] = temp["Semester"]
+            else:
+                self._df["Semester"] = None
+
+            # Handle NaN values in the Grades column (if present)
+            if "Grades" in temp.columns:
+                self._df["Grades"] = temp["Grades"]
+            else:
+                self._df["Grades"] = None
+
             # Handle NaN values in the Tags column (if present)
             if "Tags" in temp.columns:
-                self._df["Tags"] = temp["Tags"].apply(lambda tags: from_string_to_list(tags) if pd.notna(tags) else [])
+                self._df["Tags"] = temp["Tags"].apply(
+                    lambda tags: from_string_to_list(tags) if pd.notna(tags) else [])
             else:
-                self._df["Tags"] = []
+                self._df["Tags"] = [[] for _ in range(len(self._df))]
+
             return 0
         else:
             return 1
@@ -235,15 +251,19 @@ class CourseList():
         temp.rename_axis("Course Code", inplace=True)
         print(temp)
 
+
     def save_to_csv(self):
-        """saves the dataframe to CSV"""
-        # self.print_csv()
+        """Saves the dataframe to CSV without the index column."""
         temp = self._df.copy()
+
+        # Add the "Tags" column if it's missing, and handle NaN values
         if "Tags" not in temp.columns:
             temp["Tags"] = [[] for _ in range(len(temp))]
+
+        # Replace NaN values with empty lists and convert lists to strings
         temp["Tags"] = temp["Tags"].apply(lambda tags: [] if pd.isna(tags) else tags)
         temp["Tags"] = temp["Tags"].apply(from_list_to_string)
-        temp.rename_axis("Course Code", inplace=True)
+        temp.to_csv(self._csv_location)
 
 
     def __send_error(self, msg:str):
@@ -263,18 +283,22 @@ class CourseList():
             that the user wants to be added to the new csv
         """
         print("Creating CSV :\n", course_list)
+        columns = ["Course Code", "Course Name", "Credits", "Grades", "Semester", "Tags"]
         if len(course_list) < 1:
-            self._df = pd.DataFrame(columns=["Course Code", "Course Name", "Credits", "tags"])
+            self._df = pd.DataFrame(columns=columns)
         else:
             data = [{
                 'Course Code': course.code,
                 'Course Name': course.name,
                 'Credits': course.credits,
-                'tags': course.return_tags_as_string()
+                'Grades': course.grade,
+                'Semester': course.semester_taken,
+                'Tags': (course.return_tags_as_string() if 
+                            course.return_tags_as_string() != "No tags found" else None)
             } for course in course_list]
 
-            self._df = pd.DataFrame(data)
-            self._df.set_index('code', inplace=True)
+            self._df = pd.DataFrame(data, columns=columns)
+        self._df.set_index('Course Code', inplace=True)
 
         print("Finished DF being printed:\n", self._df)
         print("Printing CSV to location:", self.csv_location)

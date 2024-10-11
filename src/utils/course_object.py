@@ -8,6 +8,8 @@ class CourseObject():
     __code = None
     __name = None
     __credits = None
+    __grade = None
+    __semester_taken = None
     __tags = None
 #region Class function overrides
     def __init__(self, code: str, name: str, credit_count: int, tags: List[str] = None):
@@ -71,6 +73,28 @@ class CourseObject():
     @credits.setter
     def credits(self, value: int) -> None:
         self.__credits = value
+
+
+    @property
+    def grade(self) -> str:
+        """Property for letter grade."""
+        return self.__grade
+
+
+    @grade.setter
+    def grade(self, grade: str) -> None:
+        self.__grade = grade
+
+
+    @property
+    def semester_taken(self) -> str:
+        """Property for semester taken."""
+        return self.__semester_taken
+
+
+    @semester_taken.setter
+    def semester_taken(self, semester_taken: str) -> None:
+        self.__semester_taken = semester_taken
 
 
     @property

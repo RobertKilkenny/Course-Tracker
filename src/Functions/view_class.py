@@ -1,5 +1,5 @@
 from PySide2.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QLabel
-from PySide2.QtCore import QRegExp, QPoint
+from PySide2.QtCore import QRegExp, QPoint, Qt
 from PySide2.QtGui import QFont, QPalette, QColor
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
@@ -50,16 +50,41 @@ class ViewClass(SubwindowWidget):
 
         self.__data_points = {"Class Name": LabelDetail("Name:", font_size=12),
                                  "Credits": LabelDetail("Credits:", font_size=12),
+                                 "Semester": LabelDetail("Semester taken:", font_size=12),
                                  "Tags": LabelDetail("Tags:", font_size=12)}
 
         for value in self.__data_points.values():
             self.class_details_layout.addWidget(value)
         self.class_details_holder.setLayout(self.class_details_layout)
+        self.class_details_holder.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Widget to display the grade or lack thereoff
         self.grade_layout = QVBoxLayout()
+        self.grade_layout.setAlignment(Qt.AlignTop)
         self.grade_holder = QWidget()
+        grade_label = QLabel("<u>Grade</u>")
+        grade_label.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+        grade_label_font = QFont()
+        grade_label_font.setPointSize(30)
+        grade_label_font.setBold(True)
+        grade_label.setFont(grade_label_font)
+        grade_label.setAlignment(Qt.AlignCenter)
+        self.grade_layout.addWidget(grade_label)
+        grade_letter = QLabel("N/A")
+        grade_letter.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+        grade_letter_font = QFont()
+        grade_letter_font.setPointSize(30)
+        grade_letter_font.setBold(True)
+        grade_letter.setFont(grade_letter_font)
+        grade_letter.setAlignment(Qt.AlignCenter)
+        self.grade_layout.setAlignment(Qt.AlignRight)
         self.grade_holder.setLayout(self.grade_layout)
+        self.grade_holder.setSizePolicy(QSizePolicy.MinimumExpanding,
+                                        QSizePolicy.Expanding)
+        self.grade_holder.setStyleSheet("background-color: lightgray;")
+
+
+
         self.data_layout.addWidget(self.class_details_holder)
         self.data_layout.addWidget(self.grade_holder)
         self.data_holder.setLayout(self.data_layout)
@@ -118,6 +143,9 @@ class ViewClass(SubwindowWidget):
             course = self.app_manager.get_class_details(code)
             self.__data_points["Class Name"].set_detail(course.name)
             self.__data_points["Credits"].set_detail(str(course.credits))
-            self.__data_points["Tags"].set_detail(str(course.return_tags_as_string()))
+            self.__data_points["Semester"].set_detail(str(course.semester_taken))
+            temp = course.return_tags_as_string()
+            self.__data_points["Tags"].set_detail(temp if temp != "No tags found" else None)
+            self.grade_letter.setText(course.grade)
             return 0
         return 1

@@ -13,7 +13,7 @@ from utils.app_manager import AppManager
 class MainMenu(QVBoxLayout):
     """Make the layout"""
     def __init__(self, load_opening_menu, toolbar: MyToolBar,
-                 course_list: CourseList, app_manager: AppManager):
+                 course_list: CourseList, app_manager: AppManager, data):
         super().__init__()
         self.setSizeConstraint(QLayout.SetNoConstraint)
         self.toolbar = toolbar
@@ -24,11 +24,15 @@ class MainMenu(QVBoxLayout):
         # Create the subwindow to display main content
         self.subwindow_stack = QStackedWidget()
         self.subwindow_stack.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        
+
         # For when a CSV needs to be made
-        self.gen_csv_widget = GenerateCSV(self.app_manager)
+        self.gen_csv_widget = None
+        if data["Class Data Path"] is None:
+            self.gen_csv_widget = GenerateCSV(self.app_manager)
+        else:
+            self.gen_csv_widget = GenerateCSV(self.app_manager, data["Class Data Path"])
         self.gen_csv_widget.setParent(self)
-        
+
         # Different subwindows for editing
         self.opening_widget = make_opener()
         self.add_class_widget = AddClass(self.app_manager)

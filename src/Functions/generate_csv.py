@@ -10,7 +10,7 @@ from utils.course_object import CourseObject
 
 class GenerateCSV(SubwindowWidget):
     """Create the window to have the user make a new class."""
-    def __init__(self, app_manager: AppManager):
+    def __init__(self, app_manager: AppManager, starting_path: str = None):
         super().__init__(app_manager, "No CSV found for the app. Choose a way to resolve this:")
         self.file_dialog = QFileDialog(self)
         self.file_dialog.setFileMode(QFileDialog.ExistingFile)
@@ -19,7 +19,10 @@ class GenerateCSV(SubwindowWidget):
         self.popup = QWidget()
 
         self.prompt = GenerateWindowWidget(self)
-        self.prompt.filepath_line_edit.setText(self.gen_default_csv_path())
+        if starting_path is None:
+            self.prompt.filepath_line_edit.setText(self.gen_default_csv_path())
+        else:
+            self.prompt.filepath_line_edit.setText(starting_path)
         self.courses = self.prompt.class_elements
         self.__csv_file_path = None
 
@@ -130,9 +133,10 @@ class GenerateCSV(SubwindowWidget):
         self.popup.close()
         for course in self.courses:
             temp = course.get_values()
-            if temp["code"] is None or temp["name"] is None or temp["credits"] is None:
+            if (temp["Course Code"] is None or temp["Course Name"] is None or
+                    temp["Credits"] is None):
                 continue
-            class_obj = CourseObject(temp["code"], temp["name"], temp["credits"])
+            class_obj = CourseObject(temp["Course Code"], temp["Course Name"], temp["Credits"])
             if len(class_obj.make_list_of_vars_failing()) == 0:
                 result.append(class_obj)
         self.__csv_file_path = self.prompt.filepath_line_edit.text()
@@ -266,18 +270,19 @@ class ClassElement(QWidget):
         self.setLayout(self.layout)
 
     def get_values(self):
-        """Returns a dictionary with 'code', 'name', and 'credits' or None if values are invalid."""
+        """Returns a dictionary with 'Course Code', 'Course Name', and 'Credits' or None if 
+        values are invalid."""
         result = {}
         temp = self.question_dict["course-code"].text()
-        result["code"] = temp if len(temp) == 7 else None
+        result["Course Code"] = temp if len(temp) == 7 else None
 
         temp = self.question_dict["course-name"].text()
-        result["name"] = temp if len(temp) > 2 else None
+        result["Course Name"] = temp if len(temp) > 2 else None
 
         temp = self.question_dict["course-credits"].text()
-        result["credits"] = None
+        result["Credits"] = None
         if len(temp) > 0:
-            result["credits"] = int(temp)
+            result["Credits"] = int(temp)
         return result
 
 
