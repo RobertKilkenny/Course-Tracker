@@ -281,5 +281,5 @@ class AppManager(QObject):
             float: The value (X.XX) on a 4.00 scale. If the letter grade does
                 not exist, it will return -1.00.
         """
-        return self.grading_settings(letter_grade)
+        return self.grading_settings.grade_scale[letter_grade]
 #endregion

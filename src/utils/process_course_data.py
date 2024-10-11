@@ -228,7 +228,7 @@ class CourseList():
             return None
         information = self._df.loc[course_code]
         return CourseObject(course_code, information["Course Name"], int(information["Credits"]),
-                     information["Tags"])
+                            information["Grades"], information["Semester"], information["Tags"])
 
 
     def search_by_tag(self, tag: str):

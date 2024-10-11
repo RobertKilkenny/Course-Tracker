@@ -11,20 +11,20 @@ class CourseObject():
     __grade = None
     __semester_taken = None
     __tags = None
+
 #region Class function overrides
-    def __init__(self, code: str, name: str, credit_count: int, tags: List[str] = None):
+    def __init__(self, code: str, name: str, credit_count: int, grade: str, semester: str,
+                 tags: List[str] = None):
         self.__code = code
         self.__name = name
         self.__credits = credit_count
+        self.__grade = grade
+        self.__semester_taken = semester
         self.__tags = [] if tags is None else tags
 
 
     def __str__(self) -> str:
-        val = f"({self.__name} (Code: {self.__code})\n   *Credits: {self.__credits}"
-        if len(self.__tags) > 0:
-            val = val + f"\n   *tags: {self.__tags}"
-        val = val + ")\r"
-        return val
+        return self.create_stats()
 
 
     def __repr__(self) -> str:
@@ -37,7 +37,8 @@ class CourseObject():
         return (self.__code == other.code
                 and self.__name == other.name
                 and self.__credits == other.credits
-                and sorted(self.__tags) == sorted(other.tags))
+                and sorted(self.__tags) == sorted(other.tags)
+                and self.__semester_taken == self.semester_taken)
 #endregion
 
 
@@ -164,12 +165,24 @@ class CourseObject():
 
     def print_stats(self) -> None:
         """A function for debugging to print all stats in the class object."""
-        print("\nPrinting stats for class!\n--------------------")
-        print(f"Class Code: {self.__code}")
-        print(f"Class Name: {self.__name}")
-        print(f"Credits: {self.__credits}")
+        print(self.create_stats())
+
+
+    def create_stats(self) -> str:
+        """Create a string to be printed out for print() and such
+
+        Returns:
+            str: The string to be printed directly
+        """
+        print_this = "\nPrinting stats for class!\n--------------------"
+        print_this += print_this + f"\nClass Code: {self.__code}"
+        print_this += print_this + f"\nClass Name: {self.__name}"
+        print_this += print_this + f"\nCredits: {self.__credits}"
+        print_this += print_this + f"\nGrade: {self.__grade}"
+        print_this += print_this + f"\nSemester: {self.__semester_taken}"
         if len(self.__tags) > 0:
-            print(f'Tags: {self.return_tags_as_string()}')
+            print_this += print_this + f"\nTags: {self.return_tags_as_string()}"
+        return print_this
 
 
     def make_list_of_vars_failing(self) -> List[str]:

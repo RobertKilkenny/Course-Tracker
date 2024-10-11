@@ -1,6 +1,6 @@
 from PySide2.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QLabel
 from PySide2.QtCore import QRegExp, QPoint, Qt
-from PySide2.QtGui import QFont, QPalette, QColor
+from PySide2.QtGui import QFont, QColor
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
 from utils.question_block import SimpleQuestionBlock
@@ -70,14 +70,14 @@ class ViewClass(SubwindowWidget):
         grade_label.setFont(grade_label_font)
         grade_label.setAlignment(Qt.AlignCenter)
         self.grade_layout.addWidget(grade_label)
-        grade_letter = QLabel("N/A")
-        grade_letter.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+        self.grade_letter = QLabel("")
+        self.grade_letter.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
         grade_letter_font = QFont()
-        grade_letter_font.setPointSize(30)
+        grade_letter_font.setPointSize(150)
         grade_letter_font.setBold(True)
-        grade_letter.setFont(grade_letter_font)
-        grade_letter.setAlignment(Qt.AlignCenter)
-        self.grade_layout.setAlignment(Qt.AlignRight)
+        self.grade_letter.setFont(grade_letter_font)
+        self.grade_letter.setAlignment(Qt.AlignHCenter)
+        self.grade_layout.addWidget(self.grade_letter)
         self.grade_holder.setLayout(self.grade_layout)
         self.grade_holder.setSizePolicy(QSizePolicy.MinimumExpanding,
                                         QSizePolicy.Expanding)
@@ -141,11 +141,19 @@ class ViewClass(SubwindowWidget):
             return -1
         if  self.app_manager.does_class_exist(code):
             course = self.app_manager.get_class_details(code)
+            print("Found class:", course)
             self.__data_points["Class Name"].set_detail(course.name)
             self.__data_points["Credits"].set_detail(str(course.credits))
             self.__data_points["Semester"].set_detail(str(course.semester_taken))
             temp = course.return_tags_as_string()
             self.__data_points["Tags"].set_detail(temp if temp != "No tags found" else None)
             self.grade_letter.setText(course.grade)
+            GPA = self.app_manager.get_grade_letter_value(course.grade)
+            color = QColor(255, 0, 0)
+            if GPA > 3:
+                color = QColor(0, 255, 0)
+            elif GPA > 2:
+                color = QColor(255, 255, 0)
+            self.grade_letter.setStyleSheet(f"color: {color.name()};")
             return 0
         return 1
