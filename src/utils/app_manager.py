@@ -133,6 +133,11 @@ class AppManager(QObject):
         return os.path.exists(self.course_list.csv_location)
 
 
+    def save_changes(self):
+        """Save changes to class CSV"""
+        self.course_list.save_to_csv()
+
+
 #region CourseList Access points
     def does_class_exist(self, code: str) -> bool:
         """Checks if the class already exists using the course code 

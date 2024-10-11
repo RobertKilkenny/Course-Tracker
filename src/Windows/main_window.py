@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
     def close_application(self):
         """End the window and perform the necessary clean-up.
         """
+        self.app_manager.save_changes()
         self.close()
 
 

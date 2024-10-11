@@ -224,19 +224,21 @@ class CourseList():
 
 
     def print_csv(self):
-        """Prints the dataframe to console and saves it to CSV."""
+        """Prints the dataframe to console"""
         print("\nPrinting dataframe!",
             "\n------------------------------------------")
-
         temp = self._df.copy()
         if "Tags" not in temp.columns:
             temp["Tags"] = [[] for _ in range(len(temp))]
         temp["Tags"] = temp["Tags"].apply(lambda tags: [] if pd.isna(tags) else tags)
         temp["Tags"] = temp["Tags"].apply(from_list_to_string)
-
         temp.rename_axis("Course Code", inplace=True)
         print(temp)
-        temp.to_csv(self.csv_location, index_label="Course Code")
+
+    def save_to_csv(self):
+        """saves the dataframe to CSV"""
+        # self.print_csv()
+        self._df.to_csv(self.csv_location, index_label="Course Code")
 
 
     def __send_error(self, msg:str):

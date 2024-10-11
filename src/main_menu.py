@@ -80,6 +80,7 @@ class MainMenu(QVBoxLayout):
             case _:
                 print("Test Frame Window (Debug Only)")
                 change_to = self.test_frame
+        self.app_manager.save_changes()
         self.subwindow_stack.setCurrentWidget(change_to)
 
 
