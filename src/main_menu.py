@@ -5,6 +5,7 @@ from PySide2.QtGui import QPixmap, QFont
 from my_toolbar import MyToolBar
 from Functions.add_class import AddClass
 from Functions.edit_class import EditClass
+from Functions.view_class import ViewClass
 from Functions.generate_csv import GenerateCSV
 from utils.process_course_data import CourseList
 from utils.app_manager import AppManager
@@ -23,17 +24,25 @@ class MainMenu(QVBoxLayout):
         # Create the subwindow to display main content
         self.subwindow_stack = QStackedWidget()
         self.subwindow_stack.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        # self.subwindow_stack.setMinimumHeight(500)
+        
+        # For when a CSV needs to be made
+        self.gen_csv_widget = GenerateCSV(self.app_manager)
+        self.gen_csv_widget.setParent(self)
+        
+        # Different subwindows for editing
         self.opening_widget = make_opener()
         self.add_class_widget = AddClass(self.app_manager)
         self.add_class_widget.setParent(self)
         self.edit_class_widget = EditClass(self.app_manager)
         self.edit_class_widget.setParent(self)
-        self.gen_csv_widget = GenerateCSV(self.app_manager)
-        self.gen_csv_widget.setParent(self)
+        self.view_class_widget = ViewClass(self.app_manager)
+        self.view_class_widget.setParent(self)
+
+        # Add the subwindows
         self.subwindow_stack.addWidget(self.opening_widget)
         self.subwindow_stack.addWidget(self.add_class_widget)
         self.subwindow_stack.addWidget(self.edit_class_widget)
+        self.subwindow_stack.addWidget(self.view_class_widget)
         self.subwindow_stack.addWidget(self.gen_csv_widget)
 
         # Load back to the home screen!!!
@@ -77,6 +86,9 @@ class MainMenu(QVBoxLayout):
             case 1:
                 print("Edit Class Window")
                 change_to = self.edit_class_widget
+            case 2:
+                print("View Class Window")
+                change_to = self.view_class_widget
             case _:
                 print("Test Frame Window (Debug Only)")
                 change_to = self.test_frame

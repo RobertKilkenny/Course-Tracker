@@ -11,7 +11,7 @@ from utils.course_object import CourseObject
 class GenerateCSV(SubwindowWidget):
     """Create the window to have the user make a new class."""
     def __init__(self, app_manager: AppManager):
-        super().__init__(app_manager)
+        super().__init__(app_manager, "No CSV found for the app. Choose a way to resolve this:")
         self.file_dialog = QFileDialog(self)
         self.file_dialog.setFileMode(QFileDialog.ExistingFile)
         self.file_dialog.setNameFilter("CSV File (*.csv)")
@@ -155,9 +155,6 @@ class GenerateWindowWidget(QWidget):
         font = QFont()
         font.setBold(True)
         font.setPointSize(20)
-        self.find_file_label.setFont(font)
-        self.find_file_label.setText("No CSV found for the app. Choose a way to resolve this:")
-        layout.addWidget(self.find_file_label)
 
         # Create Option 1: Find a new CSV to Check
         self.find_file_label = QLabel()

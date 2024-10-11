@@ -24,6 +24,10 @@ class MyToolBar(QToolBar):
         edit_class.setCheckable(True)
         edit_class.clicked.connect(self.open_edit_class)
         self.options.append(edit_class)
+        view_class = QPushButton("View Class")
+        view_class.setCheckable(True)
+        view_class.clicked.connect(self.open_view_class)
+        self.options.append(view_class)
 
         #Link them to the parent to be displayed
         for option in self.options:
@@ -59,3 +63,8 @@ class MyToolBar(QToolBar):
     def open_edit_class(self):
         """Handle changing to the subwindow to the edit class widget."""
         self.app_manager.emit_subwindow_change(1)
+
+
+    def open_view_class(self):
+        """Handle changing to the subwindow to the view class widget."""
+        self.app_manager.emit_subwindow_change(2)

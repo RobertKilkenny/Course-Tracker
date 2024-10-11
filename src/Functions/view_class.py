@@ -1,59 +1,55 @@
-from PySide2.QtWidgets import QPushButton
+from PySide2.QtWidgets import QPushButton, QVBoxLayout, QWidget, QSizePolicy
 from PySide2.QtCore import QRegExp, QPoint
+from PySide2.QtGui import QFont, QPalette, QColor
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
 from utils.question_block import SimpleQuestionBlock
 from Windows.popup_window import PopupWindow
 
 
-class EditClass(SubwindowWidget):
+class ViewClass(SubwindowWidget):
     """This is the subwindow to edit an existing class"""
     def __init__(self, app_manager: AppManager):
-        super().__init__(app_manager, "Edit a Class' Details")
+        super().__init__(app_manager, "View Class Stats")
         self.popup = None
 
+        self.user_choice_layout = QVBoxLayout()
+        self.user_choice_holder = QWidget()
         self.user_class_choice = SimpleQuestionBlock(
-            question="What is the class code that you want to change?",
+            question="What is the class code that you want to view?",
             placeholder="Remember it should be in the form XXX0000",
             regex=QRegExp("[A-Z]{3}[0-9]{4}"))
         self.user_class_choice.set_user_access(True)
         self.check_button = QPushButton("Search for class!")
         self.check_button.setCheckable(True)
         self.check_button.clicked.connect(self.check_class)
-        self.layout.addWidget(self.user_class_choice)
-        self.layout.addWidget(self.check_button)
+        self.user_choice_layout.addWidget(self.user_class_choice)
+        self.user_choice_layout.addWidget(self.check_button)
+        self.user_choice_holder.setLayout(self.user_choice_layout)
+        self.user_choice_holder.setSizePolicy(QSizePolicy.Expanding,
+                                              QSizePolicy.Minimum)
+        self.layout.addWidget(self.user_choice_holder)
+        self.data_layout = QVBoxLayout()
+        self.data_holder = QWidget()
 
-        self.__form_questions = {"Class Name": SimpleQuestionBlock("New Course Name"),
+        self.__data_points = {"Class Name": SimpleQuestionBlock("New Course Name"),
                                  "Credits": SimpleQuestionBlock("New Credits Value")}
 
-        for value in self.__form_questions.values():
+        for value in self.__data_points.values():
             value.set_user_access(False)
-            self.layout.addWidget(value)
-
-        self.save_button = QPushButton("Save Changes")
-        self.save_button.setCheckable(True)
-        self.save_button.setEnabled(False)
-        self.save_button.clicked.connect(self.handle_save)
-        self.layout.addWidget(self.save_button)
+            self.data_layout.addWidget(value)
+        self.data_holder.setLayout(self.data_layout)
+        self.data_holder.setSizePolicy(QSizePolicy.Expanding,
+                                        QSizePolicy.Expanding)
+        self.layout.addWidget(self.data_holder)
         self.setLayout(self.layout)
 
     def __update(self, has_chosen_class: bool):
         self.user_class_choice.set_user_access(not has_chosen_class)
         self.check_button.setEnabled(not has_chosen_class)
-        for value in self.__form_questions.values():
+        for value in self.__data_points.values():
             value.set_user_access(has_chosen_class, True)
         self.save_button.setEnabled(has_chosen_class)
-
-
-    def handle_save(self):
-        """Allows for the chosen class to be altered if any valid changes have been made!"""
-        print("Attempting to save changes!")
-        result = self.app_manager.edit_class(self.user_class_choice.get_answer(),
-                                    self.__form_questions["Class Name"].get_answer(),
-                                    self.__form_questions["Credits"].get_answer())
-        self.__update(result == 0)
-        self.__form_questions["Class Name"].change_line_edit_placeholder("")
-        self.__form_questions["Credits"].change_line_edit_placeholder("")
 
 
     def check_class(self):
@@ -100,9 +96,9 @@ class EditClass(SubwindowWidget):
             return -1
         if  self.app_manager.does_class_exist(code):
             course = self.app_manager.get_class_details(code)
-            self.__form_questions["Class Name"].change_line_edit_placeholder(
+            self.__data_points["Class Name"].change_line_edit_placeholder(
                 "Name was " + course.name)
-            self.__form_questions["Credits"].change_line_edit_placeholder(
+            self.__data_points["Credits"].change_line_edit_placeholder(
                 "Credits' value was " + str(course.credits))
             return 0
         return 1

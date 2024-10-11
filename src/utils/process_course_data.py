@@ -238,7 +238,12 @@ class CourseList():
     def save_to_csv(self):
         """saves the dataframe to CSV"""
         # self.print_csv()
-        self._df.to_csv(self.csv_location, index_label="Course Code")
+        temp = self._df.copy()
+        if "Tags" not in temp.columns:
+            temp["Tags"] = [[] for _ in range(len(temp))]
+        temp["Tags"] = temp["Tags"].apply(lambda tags: [] if pd.isna(tags) else tags)
+        temp["Tags"] = temp["Tags"].apply(from_list_to_string)
+        temp.rename_axis("Course Code", inplace=True)
 
 
     def __send_error(self, msg:str):

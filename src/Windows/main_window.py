@@ -7,6 +7,7 @@ from main_menu import MainMenu
 from utils.app_manager import AppManager
 from utils.process_course_data import CourseList
 from utils.state_enums import StateEnums
+from utils.grading_settings import GradingSettings
 
 class MainWindow(QMainWindow):
     """Class the main window for the application to reside in.
@@ -21,7 +22,8 @@ class MainWindow(QMainWindow):
         except (ValueError, FileNotFoundError) as err:
             print(f'Course List could not be made because of:\n{err}')
             self.course_list = CourseList()
-        self.app_manager = AppManager(self.course_list, self)
+        grading_settings = GradingSettings(data, self)
+        self.app_manager = AppManager(self.course_list, grading_settings, self)
         self.toolbar = MyToolBar(self.app_manager)
 
         #Connect events to the proper functions

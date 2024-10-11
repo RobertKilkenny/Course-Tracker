@@ -1,12 +1,12 @@
 """Object to handle communication between subwindow, extra windows, and the main window.
 Holds events and listeners so that different events can be handled without explicit connections."""
 import os
-import pandas as pd
 from typing import Callable, List
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtWidgets import QWidget
 from utils.course_object import CourseObject
 from utils.process_course_data import CourseList
+from utils.grading_settings import GradingSettings
 
 class AppManager(QObject):
     """Class to faciliate communication between app widgets."""
@@ -24,9 +24,11 @@ class AppManager(QObject):
         return self.__can_change_subwindow
 
 
-    def __init__(self, course_list: CourseList, parent: QObject | None = ...) -> None:
+    def __init__(self, course_list: CourseList, grading_settings: GradingSettings,
+                 parent: QObject | None = ...) -> None:
         super().__init__(parent)
         self.course_list = course_list
+        self.grading_settings = grading_settings
 
 
 #region Handle connecting and emitting Signals
@@ -116,6 +118,8 @@ class AppManager(QObject):
 #endregion
 
 
+#region CourseList access points
+
     def create_new_csv(self, path:str, classes: List[CourseObject]) -> bool:
         """Create a new CSV using list of classes. Args are not checked in this function
         to make sure it will run properly!!! 
@@ -138,7 +142,6 @@ class AppManager(QObject):
         self.course_list.save_to_csv()
 
 
-#region CourseList Access points
     def does_class_exist(self, code: str) -> bool:
         """Checks if the class already exists using the course code 
         which is the index for the dataframe.
@@ -264,4 +267,19 @@ class AppManager(QObject):
             return 0
         else:
             return -1
+#endregion
+
+
+#region GradingSettings access points
+    def get_grade_letter_value(self, letter_grade: str) -> float:
+        """Get the value for the grade letter for GPA values
+
+        Args:
+            letter_grade (str): The letter reported for a class
+
+        Returns:
+            float: The value (X.XX) on a 4.00 scale. If the letter grade does
+                not exist, it will return -1.00.
+        """
+        return self.grading_settings(letter_grade)
 #endregion

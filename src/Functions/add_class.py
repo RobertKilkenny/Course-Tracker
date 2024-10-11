@@ -8,7 +8,7 @@ from utils.question_block import SimpleQuestionBlock
 class AddClass(SubwindowWidget):
     """Create the window to have the user make a new class."""
     def __init__(self, app_manager: AppManager):
-        super().__init__(app_manager)
+        super().__init__(app_manager, "Add Class to Database")
 
         #Define subwindow objects
         self.question_dict = {}
