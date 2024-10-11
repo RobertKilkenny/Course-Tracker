@@ -10,7 +10,6 @@ from utils.process_course_data import CourseList
 
 class AppManager(QObject):
     """Class to faciliate communication between app widgets."""
-    __create_csv = Signal(object)
     __subwindow_change = Signal(int)
     __open_window_request = Signal(QWidget)
     __close_application = Signal()
@@ -148,6 +147,18 @@ class AppManager(QObject):
         return self.course_list.does_class_exist(code)
 
 
+    def get_class_details(self, code: str) -> CourseList:
+        """Get the class object given the code
+
+        Args:
+            code (str): Index to find the object from DF
+
+        Returns:
+            CourseList: The course details saved
+        """
+        return self.course_list.return_class(code)
+
+
     def change_csv_location(self, new_location: str, is_new_file: bool = False) -> bool:
         """Change the path for the CSV and create a new DF if it is a new file
 
@@ -193,7 +204,9 @@ class AppManager(QObject):
         """
         if tags_as_string != "" and tag_array is None:
             tag_array = tags_as_string.split("|")
-        return self.add_class_from_object(CourseObject(code,name,value,tag_array))
+        if self.add_class_from_object(CourseObject(code,name,value,tag_array)) == 0:
+            self.course_list.print_csv()
+            return 0
 
 
     def add_class_from_object(self, new_class: CourseObject) -> int:
@@ -216,5 +229,34 @@ class AppManager(QObject):
             self.course_list.add_class_from_object()
         except Exception as e:
             print(e)
+            return -1
+
+
+    def edit_class(self, code: str, name: str | None, value: int | None,
+                   tag_array:List[str] = None) -> int:
+        """Adds a new class to the dataframe for the course list.
+
+        Args:
+            code (str): The course code for the class to be changed. Default format is 'AAA0000'
+            name (str, optional): The new name for the course.
+            value (int, optional): The new number of credits for the class.
+            tag_array (List[str], optional): A array holding the new relevant tags.
+            Defaults to None.
+
+        Returns:
+            int: Enumerable to define what happened
+                * 0: Succeeded
+                * 1: Failed because vital info was missing
+                * 2: Failed as it does not exist
+        """
+        print(f"New values for {code} are\nName: {name}\nCredits: {value}\ntags: {tag_array}")
+        if name is None and value is None and tag_array is None:
+            return 1
+        if not self.does_class_exist(code):
+            return 2
+        if self.course_list.edit_class(code, name, value, tag_array):
+            self.course_list.print_csv()
+            return 0
+        else:
             return -1
 #endregion

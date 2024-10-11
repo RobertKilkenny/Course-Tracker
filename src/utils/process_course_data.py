@@ -148,6 +148,31 @@ class CourseList():
         self._df.at[code, "Tags"] = result
 
 
+    def edit_class(self, code: str | None, name: str | None, value: int | None,
+                   tag_array: List[str] = None) -> bool:
+        """Edits existing class to the dataframe for the course list. Does not check if it exists!
+
+        Args:
+            code (str): The course code for the class to be added. Default format is 'AAA0000'
+            name (str): The name for the course.
+            value (int): The number of credits for the class.
+            tag_array (List[str], optional): A array holding different relevant tags.
+            Defaults to None.
+
+        Returns:
+            bool: Tells if the class was made successfully.
+        """
+        try:
+            self._df.loc[code, 'Course Name'] = name
+            self._df.loc[code, 'Credits'] = int(value)
+            if tag_array is not None:
+                self._df.loc[code, "Tags"] = tag_array
+        except Exception as err:
+            print(err)
+            return False
+        return True
+
+
     def add_class_from_object(self, course: CourseObject) -> bool:
         """Add class using CourseObject instead of literal values
 

@@ -23,7 +23,8 @@ class EditClass(SubwindowWidget):
         self.layout.addWidget(self.user_class_choice)
         self.layout.addWidget(self.check_button)
 
-        self.__form_questions = {"Class Name": SimpleQuestionBlock("New Course Name")}
+        self.__form_questions = {"Class Name": SimpleQuestionBlock("New Course Name"),
+                                 "Credits": SimpleQuestionBlock("New Credits Value")}
 
         for value in self.__form_questions.values():
             value.set_user_access(False)
@@ -43,10 +44,16 @@ class EditClass(SubwindowWidget):
             value.set_user_access(has_chosen_class, True)
         self.save_button.setEnabled(has_chosen_class)
 
+
     def handle_save(self):
         """Allows for the chosen class to be altered if any valid changes have been made!"""
         print("Attempting to save changes!")
-        self.__update(False)
+        result = self.app_manager.edit_class(self.user_class_choice.get_answer(),
+                                    self.__form_questions["Class Name"].get_answer(),
+                                    self.__form_questions["Credits"].get_answer())
+        self.__update(result == 0)
+        self.__form_questions["Class Name"].change_line_edit_placeholder("")
+        self.__form_questions["Credits"].change_line_edit_placeholder("")
 
 
     def check_class(self):
@@ -92,5 +99,10 @@ class EditClass(SubwindowWidget):
         if len(code) < 7:
             return -1
         if  self.app_manager.does_class_exist(code):
+            course = self.app_manager.get_class_details(code)
+            self.__form_questions["Class Name"].change_line_edit_placeholder(
+                "Name was " + course.name)
+            self.__form_questions["Credits"].change_line_edit_placeholder(
+                "Credits' value was " + str(course.credits))
             return 0
         return 1
