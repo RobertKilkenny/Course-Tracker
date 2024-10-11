@@ -145,7 +145,7 @@ class CourseObject():
             print(f'Tags: {self.return_tags_as_string()}')
 
 
-    def is_valid_class(self) -> List[str]:
+    def make_list_of_vars_failing(self) -> List[str]:
         """Makes Regex checks for the different variables
 
         Returns:

@@ -52,14 +52,20 @@ class GenerateCSV(SubwindowWidget):
         """Used to see if user gave a CSV with correct formatting."""
         selected_file = self.prompt.filepath_line_edit.text()
         if selected_file:
-            if isinstance(selected_file, str) and os.path.exists(selected_file):
+            if (isinstance(selected_file, str) and
+                    self.app_manager.change_csv_location(selected_file, True)):
                 self.app_manager.emit_generated_csv()
                 self.__csv_file_path = selected_file
                 return True
             else:
                 msg_box = QMessageBox()
                 msg_box.setIcon(QMessageBox.Warning)
-                msg_box.setText(f'The selected file ("{selected_file}") does not exist.')
+                if isinstance(selected_file, str):
+                    msg_box = (f'The selected file ("{selected_file}") is not formatted correctly.'+
+                               ' You can use create a proper CSV for this app using the option 2.')
+                else:
+                    msg = f'The selected file ("{selected_file}") does not exist.'
+                msg_box.setText(msg)
                 msg_box.setWindowTitle("File Error")
                 msg_box.exec_()
         else:
@@ -126,10 +132,13 @@ class GenerateCSV(SubwindowWidget):
             temp = course.get_values()
             if temp["code"] is None or temp["name"] is None or temp["credits"] is None:
                 continue
-            result.append(CourseObject(temp["code"], temp["name"], temp["credits"]))
-        if len(result) > 0:
-            result = self.app_manager.change_csv_location(self.__csv_file_path, True)
-            print(result)
+            class_obj = CourseObject(temp["code"], temp["name"], temp["credits"])
+            if len(class_obj.make_list_of_vars_failing()) == 0:
+                result.append(class_obj)
+        self.__csv_file_path = self.prompt.filepath_line_edit.text()
+        did_work = self.app_manager.create_new_csv(self.__csv_file_path, result)
+        if did_work:
+            self.app_manager.emit_generated_csv()
 
 
 class GenerateWindowWidget(QWidget):
@@ -142,14 +151,21 @@ class GenerateWindowWidget(QWidget):
         layout = QVBoxLayout()
         self.row_count = 0
         self.class_elements = []
-
-        # Create Option 1: Find a new CSV to Check
         self.find_file_label = QLabel()
         font = QFont()
         font.setBold(True)
         font.setPointSize(20)
         self.find_file_label.setFont(font)
-        self.find_file_label.setText("Choose CSV File Path")
+        self.find_file_label.setText("No CSV found for the app. Choose a way to resolve this:")
+        layout.addWidget(self.find_file_label)
+
+        # Create Option 1: Find a new CSV to Check
+        self.find_file_label = QLabel()
+        font = QFont()
+        font.setBold(True)
+        font.setPointSize(12)
+        self.find_file_label.setFont(font)
+        self.find_file_label.setText("Option 1: Choose CSV File Path")
         layout.addWidget(self.find_file_label)
 
         self.find_file_widget = QWidget()
@@ -172,16 +188,16 @@ class GenerateWindowWidget(QWidget):
         self.make_csv_label = QLabel()
         font = QFont()
         font.setBold(True)
-        font.setPointSize(20)
+        font.setPointSize(12)
         self.make_csv_label.setFont(font)
-        self.make_csv_label.setText("Make a New CSV")
+        self.make_csv_label.setText("Option 2: Make a New CSV")
         layout.addWidget(self.make_csv_label)
 
         self.notice = QLabel()
         font = QFont()
         font.setPointSize(10)
         self.notice.setFont(font)
-        self.notice.setText("Note: If you don't want to add a class, you don't need to!")
+        self.notice.setText("Note: If you don't want to add any classes yet, you don't need to!")
         layout.addWidget(self.notice)
 
         make_csv_widget = QWidget()
@@ -212,12 +228,14 @@ class GenerateWindowWidget(QWidget):
 
         self.setLayout(layout)
 
+
     def make_new_row(self):
         """Make a new row for the user to enter data into."""
         class_element_widget = ClassElement()  # Create a new ClassElement instance
         self.class_elements.append(class_element_widget)  # Add to the list
         self.add_classes_layout.addWidget(class_element_widget)  # Add the widget to the layout
         self.row_count = len(self.class_elements)  # Update row count
+
 
     def remake_add_classes_widget(self):
         """Rebuild the widget when changes are made."""

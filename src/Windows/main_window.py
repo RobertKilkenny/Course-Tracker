@@ -16,10 +16,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Course Tracker")
         self.app_data = data
         try:
-            print(self.app_data)
+            print(self.app_data["Class Data Path"])
             self.course_list = CourseList(self.app_data["Class Data Path"])
-        except ValueError as err:
-            print(err)
+        except (ValueError, FileNotFoundError) as err:
+            print(f'Course List could not be made because of:\n{err}')
             self.course_list = CourseList()
         self.app_manager = AppManager(self.course_list, self)
         self.toolbar = MyToolBar(self.app_manager)

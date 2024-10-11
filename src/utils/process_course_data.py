@@ -6,9 +6,9 @@ import pandas as pd
 from utils.course_object import CourseObject
 
 
-EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode"],
-                  "Course Name": ["course name", "coursename"],
-                  "Credits": ["credits", "value", "credit hours", "credithours"]}
+EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode", "Code", "code"],
+                  "Course Name": ["course name", "coursename", "Name", "name"],
+                  "Credits": ["credit", "credits", "value", "credit hours", "credithours"]}
 
 class CourseList():
     """Class Object to hold the data of a class for the purposes of this application."""
@@ -30,24 +30,26 @@ class CourseList():
         return self._df
 #endregion
 
+
     def __init__(self, course_csv_location: str = None):
         """_summary_
 
         Args:
             course_csv_location (str): Where the csv for the course data is located
         """
-        self.csv_location = course_csv_location
+        self._df = pd.DataFrame()
+        self._csv_location = course_csv_location
         if course_csv_location is None:
-            self._df = pd.DataFrame()
             return
 
-        self.result = self.create_dataframe_from_csv()
+        self.result = self.create_dataframe_from_csv(self._csv_location)
         match self.result:
             # Failed due to the CSV not existing!
             case -1:
-                self.__send_error("CSV does not exist.")
+                self.__send_error(f'CSV does not exist.\nPath is: "{self._csv_location}"')
             case 1:
-                temp = pd.read_csv(course_csv_location)
+                temp = pd.read_csv(self._csv_location)
+                print(temp)
                 for category, typos in EXPECTED_TYPOS.items():
                     title = next((col for col in temp.columns if col.lower() in typos), None)
                     if title:
@@ -60,7 +62,7 @@ class CourseList():
                 pass
 
         print("\nThe result of the CSV transfer is\n------------------------------------------\n",
-              self.df)
+              self._df)
 
 
 #region Unique functions
@@ -76,29 +78,50 @@ class CourseList():
                 * 1: File is not formatted correctly
         """
         if location is not None:
-            if os.path.exists(location):
-                self.csv_location = location
+            test_dir = os.path.dirname(location.replace("\\", "/"))
+            if os.path.exists(test_dir):
+                self._csv_location = location
             else:
+                print(f'Could not find folder location {test_dir}')
                 return -1
-        
-        if os.path.exists(self.csv_location):
-            print("CSV is generating the dataframe")
-            temp = pd.read_csv(self.csv_location)
-
-            required_columns = ["Course Code", "Course Name", "Credits"]
-            if all(column in temp.columns for column in required_columns):
-                self.df = temp
-                self.df.set_index(['Course Code'], inplace=True)
-                if "Tags" in temp.columns:
-                    print(temp)
-                    self.df["Tags"] = temp["Tags"].apply(from_string_to_list)
-                else:
-                    self.df["Tags"] = []
-                return 0
-            else:
-                return 1
+        elif self._csv_location is not None and len(self._csv_location) > 0:
+            test_dir = os.path.dirname(self._csv_location.replace("\\", "/"))
+            if not os.path.exists(test_dir):
+                print(f'Could not find folder location {test_dir}')
+                return -1
         else:
             return -1
+
+        print("CSV is generating the dataframe")
+        try:
+            temp = pd.read_csv(self.csv_location)
+        except FileNotFoundError:
+            return -1
+        except pd.errors.EmptyDataError:
+            return 1
+
+        # Rename the columns to the expected names
+        temp.rename(columns={
+            'code': 'Course Code',
+            'name': 'Course Name',
+            'credits': 'Credits',
+            'tags': 'Tags'
+        }, inplace=True)
+
+        # Check if required columns are present
+        required_columns = ["Course Code", "Course Name", "Credits"]
+        if all(column in temp.columns for column in required_columns):
+            self._df = temp
+            self._df.set_index(['Course Code'], inplace=True)
+
+            # Handle NaN values in the Tags column (if present)
+            if "Tags" in temp.columns:
+                self._df["Tags"] = temp["Tags"].apply(lambda tags: from_string_to_list(tags) if pd.notna(tags) else [])
+            else:
+                self._df["Tags"] = []
+            return 0
+        else:
+            return 1
 
 
     def add_class(self, code: str, name: str, value: int, tag_array:List[str] = None,
@@ -116,13 +139,13 @@ class CourseList():
         Returns:
             bool: Tells if the class was made successfully.
         """
-        self.df.loc[code] = {"Course Name": name, "Credits": value}
+        self._df.loc[code] = {"Course Name": name, "Credits": value}
         result = (
             tag_array if tag_array
             else from_string_to_list(tags_as_string) if tags_as_string
             else None
         )
-        self.df.at[code, "Tags"] = result
+        self._df.at[code, "Tags"] = result
 
 
     def add_class_from_object(self, course: CourseObject) -> bool:
@@ -147,7 +170,7 @@ class CourseList():
         Returns:
             bool: Returns if the course code is found in the dataframe.
         """
-        return course_code in self.df.index
+        return course_code in self._df.index
 
 
     def return_class(self, course_code: str) -> CourseObject:
@@ -162,7 +185,7 @@ class CourseList():
         """
         if not self.does_class_exist(course_code=course_code):
             return None
-        information = self.df.loc[course_code]
+        information = self._df.loc[course_code]
         return CourseObject(course_code, information["Course Name"], int(information["Credits"]),
                      information["Tags"])
 
@@ -180,16 +203,10 @@ class CourseList():
         print("\nPrinting dataframe!",
             "\n------------------------------------------")
 
-        temp = self.df.copy()
-        
-        # Check if 'Tags' column exists, if not, create it with empty lists
+        temp = self._df.copy()
         if "Tags" not in temp.columns:
             temp["Tags"] = [[] for _ in range(len(temp))]
-        
-        # Fill NaN values in the "Tags" column with empty lists before applying conversion
         temp["Tags"] = temp["Tags"].apply(lambda tags: [] if pd.isna(tags) else tags)
-        
-        # Convert lists of tags to strings
         temp["Tags"] = temp["Tags"].apply(from_list_to_string)
 
         temp.rename_axis("Course Code", inplace=True)
@@ -214,14 +231,18 @@ class CourseList():
             that the user wants to be added to the new csv
         """
         print("Creating CSV :\n", course_list)
-        data = [{
-        'name': course.name,
-        'credits': course.credits,
-        'tags': course.return_tags_as_string()
-        } for course in course_list]
+        if len(course_list) < 1:
+            self._df = pd.DataFrame(columns=["Course Code", "Course Name", "Credits", "tags"])
+        else:
+            data = [{
+                'Course Code': course.code,
+                'Course Name': course.name,
+                'Credits': course.credits,
+                'tags': course.return_tags_as_string()
+            } for course in course_list]
 
-        self._df = pd.DataFrame(data, index=[course.code for course in course_list])
-        self._df.index.name = 'code'
+            self._df = pd.DataFrame(data)
+            self._df.set_index('code', inplace=True)
 
         print("Finished DF being printed:\n", self._df)
         print("Printing CSV to location:", self.csv_location)

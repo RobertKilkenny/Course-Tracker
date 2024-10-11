@@ -1,5 +1,5 @@
 from typing import List
-from PySide2.QtWidgets import QPushButton
+from PySide2.QtWidgets import QPushButton, QMessageBox
 from PySide2.QtCore import QRegExp
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
@@ -39,10 +39,22 @@ class AddClass(SubwindowWidget):
         """Checks if the Add Class widget has all values needed to make a new class."""
         error_list = self.validate_complete()
         if len(error_list) != 0:
-            print(read_user_errors(error_list))
+            error_msg = read_user_errors(error_list)
+            self.display_error_messages(error_msg)
             return False
         else:
             return True
+
+
+    def display_error_messages(self, error_msg: str):
+        """Display the error messages in a QMessageBox."""
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setWindowTitle("Input Error")
+        msg_box.setText("There are errors in your info for a new class:")
+        msg_box.setInformativeText(error_msg)
+        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.exec_()
 
 
     def validate_complete(self)-> List[int]:
@@ -74,7 +86,7 @@ class AddClass(SubwindowWidget):
         print(f"\n\tTest if course code ({print_string}) already exists",  end=" ")
         if self.app_manager.does_class_exist(self.question_dict["course-code"].input.text()):
             report.append(4)
-            print(" *", end ="")
+            print(" *", end ="") 
         print("\n")
         return report
 
@@ -89,6 +101,7 @@ class AddClass(SubwindowWidget):
                                        value=int(self.question_dict["course-credits"].input.text()))
         else:
             print("Invalid class!")
+
 
 def read_user_errors(error_list) -> str:
     """Prints all errors in report from the error array"""

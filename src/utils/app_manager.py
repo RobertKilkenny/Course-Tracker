@@ -1,6 +1,7 @@
 """Object to handle communication between subwindow, extra windows, and the main window.
 Holds events and listeners so that different events can be handled without explicit connections."""
 import os
+import pandas as pd
 from typing import Callable, List
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtWidgets import QWidget
@@ -116,6 +117,23 @@ class AppManager(QObject):
 #endregion
 
 
+    def create_new_csv(self, path:str, classes: List[CourseObject]) -> bool:
+        """Create a new CSV using list of classes. Args are not checked in this function
+        to make sure it will run properly!!! 
+
+        Args:
+            path (str): Path to save to
+            classes (List[CourseObject]): List of class objects to add to csv
+
+        Returns:
+            bool: Returns if creation was successful
+        """
+        if self.course_list.csv_location != path:
+            self.course_list.csv_location = path
+        self.course_list.make_csv_from_list(classes)
+        return os.path.exists(self.course_list.csv_location)
+
+
 #region CourseList Access points
     def does_class_exist(self, code: str) -> bool:
         """Checks if the class already exists using the course code 
@@ -127,7 +145,7 @@ class AppManager(QObject):
         Returns:
             bool: Returns if the course code is found in the dataframe.
         """
-        self.course_list.does_class_exist(code)
+        return self.course_list.does_class_exist(code)
 
 
     def change_csv_location(self, new_location: str, is_new_file: bool = False) -> bool:
@@ -141,8 +159,14 @@ class AppManager(QObject):
         Returns:
             bool: Returns if the change was successful
         """
+        print(f'changing location to {new_location}')
         if is_new_file:
-            return self.course_list.create_dataframe_from_csv(new_location) == 0
+            if os.path.exists(new_location):
+                result = self.course_list.create_dataframe_from_csv(new_location)
+                print(f'Result is {result}')
+                return  result == 0
+            else:
+                return False
         else:
             self.course_list.csv_location = new_location
 
@@ -186,7 +210,7 @@ class AppManager(QObject):
         """
         if self.course_list.does_class_exist(new_class.code):
             return 2
-        if not new_class.is_valid_class():
+        if not new_class.make_list_of_vars_failing():
             return 1
         try:
             self.course_list.add_class_from_object()
