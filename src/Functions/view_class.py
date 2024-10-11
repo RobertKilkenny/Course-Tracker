@@ -1,9 +1,11 @@
-from PySide2.QtWidgets import QPushButton, QVBoxLayout, QWidget, QSizePolicy
+from PySide2.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QLabel
 from PySide2.QtCore import QRegExp, QPoint
 from PySide2.QtGui import QFont, QPalette, QColor
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
 from utils.question_block import SimpleQuestionBlock
+from utils.labeled_datail import LabelDetail
+from utils.process_course_data import from_list_to_string
 from Windows.popup_window import PopupWindow
 
 
@@ -19,7 +21,6 @@ class ViewClass(SubwindowWidget):
             question="What is the class code that you want to view?",
             placeholder="Remember it should be in the form XXX0000",
             regex=QRegExp("[A-Z]{3}[0-9]{4}"))
-        self.user_class_choice.set_user_access(True)
         self.check_button = QPushButton("Search for class!")
         self.check_button.setCheckable(True)
         self.check_button.clicked.connect(self.check_class)
@@ -29,15 +30,38 @@ class ViewClass(SubwindowWidget):
         self.user_choice_holder.setSizePolicy(QSizePolicy.Expanding,
                                               QSizePolicy.Minimum)
         self.layout.addWidget(self.user_choice_holder)
-        self.data_layout = QVBoxLayout()
+        self.data_layout = QHBoxLayout()
         self.data_holder = QWidget()
 
-        self.__data_points = {"Class Name": SimpleQuestionBlock("New Course Name"),
-                                 "Credits": SimpleQuestionBlock("New Credits Value")}
+        # Widget to display class details
+        self.class_details_layout = QVBoxLayout()
+        self.class_details_holder = QWidget()
+        self.class_tags_layout = QVBoxLayout()
+
+        tags_label = QLabel("Tags")
+        tags_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        label_font = QFont()
+        label_font.setPointSize(12)
+        label_font.setBold(True)
+        tags_label.setFont(label_font)
+        self.class_tags_layout.addWidget(tags_label)
+        self.class_tags_holder = QWidget()
+        self.class_tags_holder.setLayout(self.class_tags_layout)
+
+        self.__data_points = {"Class Name": LabelDetail("Name:", font_size=12),
+                                 "Credits": LabelDetail("Credits:", font_size=12),
+                                 "Tags": LabelDetail("Tags:", font_size=12)}
 
         for value in self.__data_points.values():
-            value.set_user_access(False)
-            self.data_layout.addWidget(value)
+            self.class_details_layout.addWidget(value)
+        self.class_details_holder.setLayout(self.class_details_layout)
+
+        # Widget to display the grade or lack thereoff
+        self.grade_layout = QVBoxLayout()
+        self.grade_holder = QWidget()
+        self.grade_holder.setLayout(self.grade_layout)
+        self.data_layout.addWidget(self.class_details_holder)
+        self.data_layout.addWidget(self.grade_holder)
         self.data_holder.setLayout(self.data_layout)
         self.data_holder.setSizePolicy(QSizePolicy.Expanding,
                                         QSizePolicy.Expanding)
@@ -45,11 +69,7 @@ class ViewClass(SubwindowWidget):
         self.setLayout(self.layout)
 
     def __update(self, has_chosen_class: bool):
-        self.user_class_choice.set_user_access(not has_chosen_class)
         self.check_button.setEnabled(not has_chosen_class)
-        for value in self.__data_points.values():
-            value.set_user_access(has_chosen_class, True)
-        self.save_button.setEnabled(has_chosen_class)
 
 
     def check_class(self):
@@ -96,9 +116,8 @@ class ViewClass(SubwindowWidget):
             return -1
         if  self.app_manager.does_class_exist(code):
             course = self.app_manager.get_class_details(code)
-            self.__data_points["Class Name"].change_line_edit_placeholder(
-                "Name was " + course.name)
-            self.__data_points["Credits"].change_line_edit_placeholder(
-                "Credits' value was " + str(course.credits))
+            self.__data_points["Class Name"].set_detail(course.name)
+            self.__data_points["Credits"].set_detail(str(course.credits))
+            self.__data_points["Tags"].set_detail(str(course.return_tags_as_string()))
             return 0
         return 1

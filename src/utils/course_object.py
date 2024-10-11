@@ -132,6 +132,9 @@ class CourseObject():
         Returns:
             str: A string of all tags delimited by one comma and a space(", ")
         """
+        if len(self.__tags) < 1:
+            return "No tags found"
+
         return ', '.join(self.__tags)
 
 
