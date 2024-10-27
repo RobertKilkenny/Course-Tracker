@@ -204,3 +204,56 @@ class CourseObject():
                 break
         return errors
 #endregion
+
+
+class Semester():
+    """A object to store what a semester is which is defined as section (a str) then a year (a int).
+    For example to get 'Fall 2024,' it is section='Fall' year=2024.
+    
+    Args:
+    - section(str): The reoccuring time period for college (like Fall, Spring, etc.)
+    - year(int): The year it took place in
+    """
+    __section: str
+    __year: int
+
+    @property
+    def section(self) -> str:
+        """Returns the reoccuring time period for college (like Fall, Spring, etc.)"""
+        return self.__section
+
+
+    @property
+    def year(self) -> str:
+        """Returns what year it took place in."""
+        return self.__year
+
+
+    def __init__(self, section: str, year: int):
+        """_summary_
+
+        Args:
+            section (str): Reoccuring time period for college (like Fall, Spring, etc.)
+            year (int): The year it took place in.
+        """
+        self.__section = section
+        self.__year = year
+
+    def __str__(self) -> str:
+        return self.print_details()
+
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Semester):
+            return False
+        return (self.__section == other.section
+                and self.__year == other.section)
+
+
+    def print_details(self):
+        """Print the semester in the format '[section] [year]'"""
+        return self.__section + str(self.__year)

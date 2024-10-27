@@ -4,7 +4,7 @@ import os
 from typing import Callable, List
 from PySide2.QtCore import QObject, Signal
 from PySide2.QtWidgets import QWidget
-from utils.course_object import CourseObject
+from utils.course_object import CourseObject, Semester
 from utils.process_course_data import CourseList
 from utils.grading_settings import GradingSettings
 
@@ -267,6 +267,10 @@ class AppManager(QObject):
             return 0
         else:
             return -1
+
+
+    def get_active_semesters(self) -> List[Semester]:
+        return self.course_list.semester_list
 #endregion
 
 

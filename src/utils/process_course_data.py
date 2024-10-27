@@ -3,7 +3,7 @@ import os
 import math
 from typing import List
 import pandas as pd
-from utils.course_object import CourseObject
+from utils.course_object import CourseObject, Semester
 
 
 EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode", "Code", "code"],
@@ -15,10 +15,19 @@ EXPECTED_TYPOS = {"Course Code": ["course code", "coursecode", "Code", "code"],
 
 class CourseList():
     """Class Object to hold the data of a class for the purposes of this application."""
+    __semester_list: List[Semester] = []
 
 #region Properties
     @property
-    def csv_location(self):
+    def semester_list(self) -> List[Semester]:
+        """Return a list tuples of all semester
+
+        Returns:
+            List[Semester]: List of Semester objects of all active semesters.
+        """
+
+    @property
+    def csv_location(self) -> str:
         """Get absolute file location for CSV holding class data."""
         return self._csv_location
 
@@ -26,6 +35,7 @@ class CourseList():
     def csv_location(self, csv_location: str):
         """Set absolute file location for CSV holding class data."""
         self._csv_location = csv_location
+
 
     @property
     def df(self):
@@ -49,7 +59,7 @@ class CourseList():
         match self.result:
             # Failed due to the CSV not existing!
             case -1:
-                self.__send_error(f'CSV does not exist.\nPath is: "{self._csv_location}"')
+                self.send_error(f'CSV does not exist.\nPath is: "{self._csv_location}"')
             case 1:
                 temp = pd.read_csv(self._csv_location)
                 print(temp)
@@ -58,7 +68,7 @@ class CourseList():
                     if title:
                         temp.rename(columns={title: category}, inplace=True)
                     else:
-                        self.__send_error("Invalid CSV was given for program.")
+                        self.send_error("Invalid CSV was given for program.")
                         break
             # There was no problems making the Dataframe
             case 0:
@@ -239,6 +249,21 @@ class CourseList():
         """
 
 
+    def remove_active_semester(self, semester: Semester) -> bool:
+        """Remove a semester because no more classes are in it.
+
+        Args:
+            semester (Semester): The semester to remove
+
+        Returns:
+            bool: If it succeeded (fails if the semester is not in list)
+        """
+        if semester not in self.__semester_list:
+            return False
+        self.__semester_list.remove(semester)
+        return True
+
+
     def print_csv(self):
         """Prints the dataframe to console"""
         print("\nPrinting dataframe!",
@@ -264,15 +289,6 @@ class CourseList():
         temp["Tags"] = temp["Tags"].apply(lambda tags: [] if pd.isna(tags) else tags)
         temp["Tags"] = temp["Tags"].apply(from_list_to_string)
         temp.to_csv(self._csv_location)
-
-
-    def __send_error(self, msg:str):
-        """_summary_
-
-        Raises:
-            ValueError: Error to raise
-        """
-        raise ValueError(msg)
 
 
     def make_csv_from_list(self, course_list: List[CourseObject]):
@@ -331,10 +347,18 @@ def from_list_to_string(tag_list: List[str]| None) -> str:
     """
     if tag_list is None:
         return "No tags!"
-    
+
     if not all(isinstance(tag, str) for tag in tag_list):
         for element in tag_list:
             if not isinstance(element, str):
                 tag_list.remove(element)
     return "|".join(tag_list)
+
+
+def send_error(self, msg:str):
+    """
+    Raises:
+        ValueError: Error to raise
+    """
+    raise ValueError(msg)
 #endregion
