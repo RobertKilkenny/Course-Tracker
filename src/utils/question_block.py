@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QSizePolicy
+from PySide2.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QSizePolicy, QComboBox
 from PySide2.QtCore import QRegExp
 from PySide2.QtGui import QRegExpValidator, QFont, QFontMetrics
 from typing import List, Dict
@@ -97,6 +97,38 @@ class NestedQuestionBlock(QWidget):
     def get_subquestion_answer(self, key):
         """Given a key, return what text is there as an answer."""
         return self.elements[key].input.text()
+
+
+class SimpleDropdownBlock(QWidget):
+    """"A default construction for a question and a dropdown menu!"""
+    def __init__(self, question: str, options: List[str], question_size: int = 14) -> QWidget:
+        super().__init__()
+        layout = QVBoxLayout()
+        self.text = create_title(question, question_size)
+        layout.addWidget(self.text)
+        self.input = QComboBox()
+        self.input.addItem(None)
+        for option in options:
+            self.input.addItem(option)
+        layout.addWidget(self.input)
+        self.setLayout(layout)
+
+
+    def set_user_access(self, can_edit: bool, should_delete_text: bool = False):
+        """Set Question Block to either allow user input or not allow changes."""
+        self.input.setEnabled(can_edit)
+        if should_delete_text and not can_edit:
+            self.input.setText("")
+
+
+    def change_line_edit_placeholder(self, new_text: str):
+        """Change the placeholder text for the answer part of the Question Block."""
+        self.input.setPlaceholderText(new_text)
+
+
+    def get_answer(self):
+        """Return the text for the QLineEdit for the question."""
+        return self.input.text()
 
 
 def get_min_size(text: QLineEdit) -> int:

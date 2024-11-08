@@ -1,9 +1,10 @@
 from typing import List
-from PySide2.QtWidgets import QPushButton, QMessageBox, QHBoxLayout, QVBoxLayout, QWidget
+from PySide2.QtWidgets import QPushButton, QMessageBox, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QComboBox
 from PySide2.QtCore import QRegExp
+from PySide2.QtGui import QFont
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
-from utils.question_block import SimpleQuestionBlock
+from utils.question_block import SimpleQuestionBlock, SimpleDropdownBlock
 
 class AddClass(SubwindowWidget):
     """Create the window to have the user make a new class."""
@@ -25,10 +26,9 @@ class AddClass(SubwindowWidget):
             question="Input the credit for the course",
             placeholder="How many credits is it worth?",
             regex=QRegExp(r'[0-9]{1}'))
-        self.optional_dict["grade"] = SimpleQuestionBlock(
+        self.optional_dict["grade"] = SimpleDropdownBlock(
             question="Grade earned",
-            placeholder="What letter grade [optional]?",
-            regex=QRegExp(r'^[+-]?[A-D]|[E-F]$'))
+            options= ["A", "B"])
         self.optional_dict["semester"] = SimpleQuestionBlock(
             question="Semester taken",
             placeholder="When was it taken [optional]?",
@@ -37,20 +37,31 @@ class AddClass(SubwindowWidget):
         #Link objects to layout to be displayed
         questions_layout = QHBoxLayout()
         questions_widget = QWidget(self)
+        questionfont = QFont()
+        questionfont.setPointSize(12)
+        questionfont.setItalic(True)
+        questionfont.setUnderline(True)
+
+        required_title = QLabel("Required Parts")
+        required_title.setFont(questionfont)
         required_questions_layout = QVBoxLayout()
+        required_questions_layout.addWidget(required_title)
         required_questions_widget = QWidget(questions_widget)
         for value in self.question_dict.values():
             required_questions_layout.addWidget(value)
         required_questions_widget.setLayout(required_questions_layout)
         questions_layout.addWidget(required_questions_widget)
 
+        optional_title = QLabel("Optional Parts")
+        optional_title.setFont(questionfont)
         optional_questions_layout = QVBoxLayout()
+        optional_questions_layout.addWidget(optional_title)
         optional_questions_widget = QWidget(questions_widget)
-        for value in self.question_dict.values():
+        for value in self.optional_dict.values():
             optional_questions_layout.addWidget(value)
         optional_questions_widget.setLayout(optional_questions_layout)
         questions_layout.addWidget(optional_questions_widget)
-        
+
         questions_widget.setLayout(questions_layout)
         self.layout.addWidget(questions_widget)
         save_button = QPushButton("Save Class")
