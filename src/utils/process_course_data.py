@@ -224,6 +224,22 @@ class CourseList():
         return course_code in self._df.index
 
 
+    def change_grade(self, course_code: str, grade: str) -> bool:
+        """Given a course code, change the grade to a different letter
+
+        Args:
+            course_code (str): the class to recieve the change.
+            grade (str): the new grade for the class.
+
+        Returns:
+            bool: Returns if the change has been pushed through.
+        """
+        if not self.does_class_exist(course_code):
+            return False
+
+        self._df[course_code]["Grades"] = grade
+        return True
+
     def return_class(self, course_code: str) -> CourseObject:
         """Finds a class by a course code in the dataframe. 
 

@@ -1,5 +1,5 @@
 from typing import List
-from PySide2.QtWidgets import QPushButton, QMessageBox
+from PySide2.QtWidgets import QPushButton, QMessageBox, QHBoxLayout, QVBoxLayout, QWidget
 from PySide2.QtCore import QRegExp
 from utils.subwindow_widget import SubwindowWidget
 from utils.app_manager import AppManager
@@ -12,6 +12,7 @@ class AddClass(SubwindowWidget):
 
         #Define subwindow objects
         self.question_dict = {}
+        self.optional_dict = {}
         self.question_dict["course-code"] = SimpleQuestionBlock(
             question="Input the new course code",
             placeholder="Put course code [ex. AAA0000]",
@@ -24,10 +25,34 @@ class AddClass(SubwindowWidget):
             question="Input the credit for the course",
             placeholder="How many credits is it worth?",
             regex=QRegExp(r'[0-9]{1}'))
+        self.optional_dict["grade"] = SimpleQuestionBlock(
+            question="Grade earned",
+            placeholder="What letter grade [optional]?",
+            regex=QRegExp(r'^[+-]?[A-D]|[E-F]$'))
+        self.optional_dict["semester"] = SimpleQuestionBlock(
+            question="Semester taken",
+            placeholder="When was it taken [optional]?",
+            regex=QRegExp(r'[\\D\\w]+[0-9]{4}'))
 
         #Link objects to layout to be displayed
+        questions_layout = QHBoxLayout()
+        questions_widget = QWidget(self)
+        required_questions_layout = QVBoxLayout()
+        required_questions_widget = QWidget(questions_widget)
         for value in self.question_dict.values():
-            self.layout.addWidget(value)
+            required_questions_layout.addWidget(value)
+        required_questions_widget.setLayout(required_questions_layout)
+        questions_layout.addWidget(required_questions_widget)
+
+        optional_questions_layout = QVBoxLayout()
+        optional_questions_widget = QWidget(questions_widget)
+        for value in self.question_dict.values():
+            optional_questions_layout.addWidget(value)
+        optional_questions_widget.setLayout(optional_questions_layout)
+        questions_layout.addWidget(optional_questions_widget)
+        
+        questions_widget.setLayout(questions_layout)
+        self.layout.addWidget(questions_widget)
         save_button = QPushButton("Save Class")
         save_button.setCheckable(True)
         save_button.clicked.connect(self.handle_save)
@@ -86,7 +111,7 @@ class AddClass(SubwindowWidget):
         print(f"\n\tTest if course code ({print_string}) already exists",  end=" ")
         if self.app_manager.does_class_exist(self.question_dict["course-code"].input.text()):
             report.append(4)
-            print(" *", end ="") 
+            print(" *", end ="")
         print("\n")
         return report
 
@@ -99,6 +124,12 @@ class AddClass(SubwindowWidget):
             self.app_manager.add_class(code=self.question_dict["course-code"].input.text(),
                                        name=self.question_dict["course-name"].input.text(),
                                        value=int(self.question_dict["course-credits"].input.text()))
+            if self.optional_dict["grade"].is_complete():
+                self.app_manager.change_grade(self.question_dict["course-code"].input.text(),
+                                              self.optional_dict["semester"].input.text())
+            if self.optional_dict["semester"].is_complete():
+                self.app_manager.change_grade(self.question_dict["course-code"].input.text(),
+                                              self.optional_dict["semester"].input.text())
         else:
             print("Invalid class!")
 
